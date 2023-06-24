@@ -37,7 +37,30 @@ body {
   border: 1px solid black;
 }
 
-/* 
-<div class="tetris__nextItemBox"></div>
-      <div class="tetris__playingBox"></div>
-      <div class="tetris__scoreBox"></div> */
+.tetris__inGameBox {
+  width: 20rem;
+  height: 30rem;
+  background-color: rgba(255, 255, 255, 0.493);
+  /* border-left: 1px solid white;
+  border-bottom: 1px solid white;
+  border-right: 1px solid white; */
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(15, 1fr);
+  grid-gap: 0;
+  /* grid-template-columns: repeat(4, 1fr); */
+  /* grid-template-rows: repeat(1fr, 6); */
+}
+
+.tetris__gridItem {
+  width: 2rem;
+  height: 2rem;
+  background-color: white;
+  border: 0.1px inset rgba(0, 0, 0, 0.5);
+}

@@ -14,6 +14,8 @@ let currentBlockArray;
 // 임시로 squre.. 나중에 랜덤으로 바꾸자
 let currentBlockShape = "squre";
 let currentKeyPress;
+let turn = true;
+let interval;
 
 function playGame(e) {
   // console.log(e);
@@ -24,8 +26,7 @@ function playGame(e) {
 // 게임 시작 버튼을 누르면 게임 시작
 // playingBtn.addEventListener("click", playGame);
 makeGameMap();
-makeNewBlock();
-keyPressHandler();
+inGamePlay();
 
 // **********************************************************************
 // 여기서부터는 함수
@@ -38,6 +39,13 @@ function makeGameMap() {
     gridCell.setAttribute("data-id", i + 1);
     playingBox.append(gridCell);
   }
+}
+
+function inGamePlay() {
+  makeNewBlock();
+  moveBlockDownPerSecond();
+  keyPressHandler();
+  blockSave();
 }
 
 function makeNewBlock(blockNumberArray) {
@@ -94,9 +102,9 @@ function keyPressHandler() {
   });
 }
 
-function moveBlock() {
+function moveBlock(pressKey) {
   removeCurrentBlock();
-  makeNewBlock(makeNewBlockNumberArray());
+  makeNewBlock(makeNewBlockNumberArray(pressKey));
 }
 
 function removeCurrentBlock() {
@@ -108,17 +116,18 @@ function removeCurrentBlock() {
   });
 }
 
-function makeNewBlockNumberArray() {
+function makeNewBlockNumberArray(pressKey) {
   console.log(currentKeyPress);
   console.log(canMove());
   if (currentBlockShape === "squre") {
-    if (currentKeyPress === "ArrowRight" && canMove())
+    if (currentKeyPress === "ArrowRight" && canMove(pressKey ? pressKey : ""))
       return currentBlockArray.map((b) => `${+b + 1}`);
-    if (currentKeyPress === "ArrowLeft" && canMove())
+    if (currentKeyPress === "ArrowLeft" && canMove(pressKey ? pressKey : ""))
       return currentBlockArray.map((b) => `${+b - 1}`);
 
-    if (currentKeyPress === "ArrowUp" && canMove()) return currentBlockArray;
-    if (currentKeyPress === "ArrowDown" && canMove())
+    if (currentKeyPress === "ArrowUp" && canMove(pressKey ? pressKey : ""))
+      return currentBlockArray;
+    if (currentKeyPress === "ArrowDown" && canMove(pressKey ? pressKey : ""))
       return currentBlockArray.map((b) => `${+b + 10}`);
   }
   return currentBlockArray;
@@ -158,12 +167,39 @@ function getFirstTwoDigitString() {
     .reduce((string, b) => (string += b), "");
 }
 
-// function downBlockPerSecond()
-// {
-//   if(canMove){}
+function moveBlockDownPerSecond() {
+  interval = true;
+  const setIntervalMoveBlockDown = setInterval(moveBlockDown, 1000);
 
-// }
+  function moveBlockDown() {
+    currentKeyPress = "ArrowDown";
+    !canMove() ? clearIntervalMoveBlockDown() : moveBlock();
+  }
 
-// function blockSave() {
-//   if(!canMove() && )
-// }
+  function clearIntervalMoveBlockDown() {
+    clearInterval(setIntervalMoveBlockDown);
+    interval = false;
+    turn = false;
+  }
+}
+// moveBlockDownPerSecond();
+
+function blockSave() {
+  console.log(interval);
+  const setIntervalCheckMovingBlock = setInterval(checkMovingBlock, 1000);
+
+  function checkMovingBlock() {
+    if (!interval && !turn) {
+      clearInterval(setIntervalCheckMovingBlock);
+      // blocktype을 여기서 바꿀게끔..
+      // currentBlockShape = '';
+      turn = true;
+      makeNewBlock();
+      moveBlockDownPerSecond();
+      // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
+      blockSave();
+      // **************** canMove에 색칠된 박스가 바로 밑에 있으면 false를 return하게 끔 만들어야 함 그래야 누적이 됨 ***********************
+    }
+  }
+}
+// blockSave();

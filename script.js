@@ -5,7 +5,10 @@ const nextItemBox = document.querySelector(".tetris__nextItemBox");
 const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
 
-const CENTERNUMBER = 5;
+const CENTER_POSITION_NUMBER = 5;
+
+// 배열로 만들어 놨다가 추후에 random으로 currentBlockShape으로 값 넘겨주기
+const blockShape = ["squre"];
 
 let currentBlockArray;
 // 임시로 squre.. 나중에 랜덤으로 바꾸자
@@ -46,18 +49,23 @@ function makeNewBlock(blockNumberArray) {
 }
 
 function makeSqure(blockNumberArray) {
-  const blockNumber = blockNumberArray
-    ? blockNumberArray
-    : [
-        `${CENTERNUMBER}`,
-        `${CENTERNUMBER + 1}`,
-        `${CENTERNUMBER + 10}`,
-        `${CENTERNUMBER + 11}`,
-      ];
-  console.log(blockNumber);
-  currentBlockShape = "squre";
-  currentBlockArray = blockNumber;
+  makeSqureShape(blockNumberArray);
   paintBlock("red");
+
+  // makeShape를 따로 빼서 재사용할 것이냐...
+  function makeSqureShape(blockNumberArray) {
+    const blockNumber = blockNumberArray
+      ? blockNumberArray
+      : [
+          `${CENTER_POSITION_NUMBER}`,
+          `${CENTER_POSITION_NUMBER + 1}`,
+          `${CENTER_POSITION_NUMBER + 10}`,
+          `${CENTER_POSITION_NUMBER + 11}`,
+        ];
+    console.log(blockNumber);
+    currentBlockShape = "squre";
+    currentBlockArray = blockNumber;
+  }
 }
 
 function paintBlock(color) {
@@ -71,28 +79,33 @@ function paintBlock(color) {
 
 function keyPressHandler() {
   window.addEventListener("keydown", (e) => {
-    // key들이 arrow우 일때만 코드가 적용되게 설정해야
-    console.log(e.key);
-    currentKeyPress = e.key;
-    if (
-      currentKeyPress === "ArrowRight" ||
-      currentKeyPress === "ArrowLeft" ||
-      currentKeyPress === "ArrowUp" ||
-      currentKeyPress === "ArrowDown"
-    ) {
-      moveBlock();
+    if (isArrowKeyPressed(e.key)) moveBlock();
+
+    function isArrowKeyPressed(key) {
+      currentKeyPress = key;
+      console.log(key);
+      return (
+        currentKeyPress === "ArrowRight" ||
+        currentKeyPress === "ArrowLeft" ||
+        currentKeyPress === "ArrowUp" ||
+        currentKeyPress === "ArrowDown"
+      );
     }
   });
 }
 
 function moveBlock() {
-  const newBlockNumberArray = makeNewBlockNumberArray();
-  console.log(newBlockNumberArray);
-
-  // if (newBlockNumberArray) {
   removeCurrentBlock();
-  makeNewBlock(newBlockNumberArray);
-  // }
+  makeNewBlock(makeNewBlockNumberArray());
+}
+
+function removeCurrentBlock() {
+  currentBlockArray.map((b) => {
+    const miniBlock = document.querySelector(
+      `.tetris__gridItem[data-id="${b}"]`
+    );
+    miniBlock.style.backgroundColor = "white";
+  });
 }
 
 function makeNewBlockNumberArray() {
@@ -103,7 +116,7 @@ function makeNewBlockNumberArray() {
       return currentBlockArray.map((b) => `${+b + 1}`);
     if (currentKeyPress === "ArrowLeft" && canMove())
       return currentBlockArray.map((b) => `${+b - 1}`);
-    // 잠시 위쪽키 봉인 중 추후 고치기
+
     if (currentKeyPress === "ArrowUp" && canMove()) return currentBlockArray;
     if (currentKeyPress === "ArrowDown" && canMove())
       return currentBlockArray.map((b) => `${+b + 10}`);
@@ -112,7 +125,9 @@ function makeNewBlockNumberArray() {
 }
 
 function canMove() {
-  if (currentBlockShape === "squre") {
+  if (currentBlockShape === "squre") return canSqureMove();
+
+  function canSqureMove() {
     const firstDigitString = getLastDigitString();
     console.log(firstDigitString);
 
@@ -143,11 +158,12 @@ function getFirstTwoDigitString() {
     .reduce((string, b) => (string += b), "");
 }
 
-function removeCurrentBlock() {
-  currentBlockArray.map((b) => {
-    const miniBlock = document.querySelector(
-      `.tetris__gridItem[data-id="${b}"]`
-    );
-    miniBlock.style.backgroundColor = "white";
-  });
-}
+// function downBlockPerSecond()
+// {
+//   if(canMove){}
+
+// }
+
+// function blockSave() {
+//   if(!canMove() && )
+// }

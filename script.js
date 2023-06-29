@@ -102,9 +102,9 @@ function keyPressHandler() {
   });
 }
 
-function moveBlock(pressKey) {
+function moveBlock() {
   removeCurrentBlock();
-  makeNewBlock(makeNewBlockNumberArray(pressKey));
+  makeNewBlock(makeNewBlockNumberArray());
 }
 
 function removeCurrentBlock() {
@@ -116,18 +116,17 @@ function removeCurrentBlock() {
   });
 }
 
-function makeNewBlockNumberArray(pressKey) {
+function makeNewBlockNumberArray() {
   console.log(currentKeyPress);
   console.log(canMove());
   if (currentBlockShape === "squre") {
-    if (currentKeyPress === "ArrowRight" && canMove(pressKey ? pressKey : ""))
+    if (currentKeyPress === "ArrowRight" && canMove())
       return currentBlockArray.map((b) => `${+b + 1}`);
-    if (currentKeyPress === "ArrowLeft" && canMove(pressKey ? pressKey : ""))
+    if (currentKeyPress === "ArrowLeft" && canMove())
       return currentBlockArray.map((b) => `${+b - 1}`);
 
-    if (currentKeyPress === "ArrowUp" && canMove(pressKey ? pressKey : ""))
-      return currentBlockArray;
-    if (currentKeyPress === "ArrowDown" && canMove(pressKey ? pressKey : ""))
+    if (currentKeyPress === "ArrowUp" && canMove()) return currentBlockArray;
+    if (currentKeyPress === "ArrowDown" && canMove())
       return currentBlockArray.map((b) => `${+b + 10}`);
   }
   return currentBlockArray;
@@ -137,21 +136,72 @@ function canMove() {
   if (currentBlockShape === "squre") return canSqureMove();
 
   function canSqureMove() {
-    const firstDigitString = getLastDigitString();
-    console.log(firstDigitString);
+    const lastDigitString = getLastDigitString();
+    console.log(lastDigitString);
 
-    if (currentKeyPress === "ArrowRight")
-      return firstDigitString === "9090" ? false : true;
-    if (currentKeyPress === "ArrowLeft")
-      return firstDigitString === "1212" ? false : true;
+    if (currentKeyPress === "ArrowRight" && canFutureMove())
+      return lastDigitString === "9090" ? false : true;
+    if (currentKeyPress === "ArrowLeft" && canFutureMove())
+      return lastDigitString === "1212" ? false : true;
 
     const FirstTwoDigitString = getFirstTwoDigitString();
     console.log(FirstTwoDigitString);
-    if (currentKeyPress === "ArrowDown")
+    if (currentKeyPress === "ArrowDown" && canFutureMove())
       return FirstTwoDigitString === "13131414" ||
         FirstTwoDigitString === "13141415"
         ? false
         : true;
+  }
+
+  function canFutureMove() {
+    const futureBlockArray = getFutureBlockArray();
+    return isTherePaintedBlock(futureBlockArray);
+
+    function getFutureBlockArray() {
+      if (currentKeyPress === "ArrowLeft") {
+        return currentBlockArray
+          .map((b) => +b - 1)
+          .filter((b) => !currentBlockArray.includes(`${b}`));
+      }
+
+      if (currentKeyPress === "ArrowRight") {
+        return currentBlockArray
+          .map((b) => +b + 1)
+          .filter((b) => !currentBlockArray.includes(`${b}`));
+      }
+
+      if (currentKeyPress === "ArrowDown") {
+        return currentBlockArray
+          .map((b) => +b + 10)
+          .filter((b) => !currentBlockArray.includes(`${b}`));
+      }
+    }
+
+    function isTherePaintedBlock(futureBlockArray) {
+      if (isOverGameMap(futureBlockArray)) {
+        return false;
+      }
+
+      console.log(futureBlockArray);
+      const canNotMoving = futureBlockArray.some((b) => {
+        const futureBlockColor = window
+          .getComputedStyle(
+            document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
+          )
+          .getPropertyValue("background-color");
+
+        const isWhite = futureBlockColor !== "rgb(255, 255, 255)";
+        console.log(futureBlockColor);
+        console.log(isWhite);
+        return isWhite;
+      });
+      console.log(canNotMoving);
+      return !canNotMoving;
+    }
+
+    function isOverGameMap(futureBlockArray) {
+      return futureBlockArray.some((b) => +b > 150);
+    }
   }
 }
 
@@ -195,7 +245,7 @@ function blockSave() {
       // currentBlockShape = '';
       turn = true;
       makeNewBlock();
-      moveBlockDownPerSecond();
+      // moveBlockDownPerSecond();
       // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
       blockSave();
       // **************** canMove에 색칠된 박스가 바로 밑에 있으면 false를 return하게 끔 만들어야 함 그래야 누적이 됨 ***********************

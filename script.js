@@ -119,45 +119,28 @@ function removeCurrentBlock() {
 function makeNewBlockNumberArray() {
   console.log(currentKeyPress);
   console.log(canMove());
-  if (currentBlockShape === "squre") {
-    if (currentKeyPress === "ArrowRight" && canMove())
+  if (currentBlockShape === "squre" && canMove()) {
+    if (currentKeyPress === "ArrowRight")
       return currentBlockArray.map((b) => `${+b + 1}`);
-    if (currentKeyPress === "ArrowLeft" && canMove())
+    if (currentKeyPress === "ArrowLeft")
       return currentBlockArray.map((b) => `${+b - 1}`);
 
-    if (currentKeyPress === "ArrowUp" && canMove()) return currentBlockArray;
-    if (currentKeyPress === "ArrowDown" && canMove())
+    if (currentKeyPress === "ArrowUp") return currentBlockArray;
+    if (currentKeyPress === "ArrowDown")
       return currentBlockArray.map((b) => `${+b + 10}`);
   }
   return currentBlockArray;
 }
 
 function canMove() {
-  if (currentBlockShape === "squre") return canSqureMove();
+  // 추후에 블락들 추가될고 arrowup key에 따른 변화도 동일하다면... blockshape지우는 리팩토링
+  return currentBlockShape === "squre" && canFutureBlockMove() ? true : false;
 
-  function canSqureMove() {
-    const lastDigitString = getLastDigitString();
-    console.log(lastDigitString);
+  function canFutureBlockMove() {
+    const futureBlockArray = makeFutureBlockArray();
+    return checkFutureBlockcanMove(futureBlockArray);
 
-    if (currentKeyPress === "ArrowRight" && canFutureMove())
-      return lastDigitString === "9090" ? false : true;
-    if (currentKeyPress === "ArrowLeft" && canFutureMove())
-      return lastDigitString === "1212" ? false : true;
-
-    const FirstTwoDigitString = getFirstTwoDigitString();
-    console.log(FirstTwoDigitString);
-    if (currentKeyPress === "ArrowDown" && canFutureMove())
-      return FirstTwoDigitString === "13131414" ||
-        FirstTwoDigitString === "13141415"
-        ? false
-        : true;
-  }
-
-  function canFutureMove() {
-    const futureBlockArray = getFutureBlockArray();
-    return isTherePaintedBlock(futureBlockArray);
-
-    function getFutureBlockArray() {
+    function makeFutureBlockArray() {
       if (currentKeyPress === "ArrowLeft") {
         return currentBlockArray
           .map((b) => +b - 1)
@@ -177,44 +160,53 @@ function canMove() {
       }
     }
 
-    function isTherePaintedBlock(futureBlockArray) {
-      if (isOverGameMap(futureBlockArray)) {
+    function checkFutureBlockcanMove(futureBlockArray) {
+      if (isFutureBlockOverGameMap(futureBlockArray)) {
         return false;
       }
-
-      console.log(futureBlockArray);
-      const canNotMoving = futureBlockArray.some((b) => {
-        const futureBlockColor = window
-          .getComputedStyle(
-            document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
-          )
-          .getPropertyValue("background-color");
-
-        const isWhite = futureBlockColor !== "rgb(255, 255, 255)";
-        console.log(futureBlockColor);
-        console.log(isWhite);
-        return isWhite;
-      });
-      console.log(canNotMoving);
-      return !canNotMoving;
+      return canfutureBlockPainted(futureBlockArray);
     }
 
-    function isOverGameMap(futureBlockArray) {
-      return futureBlockArray.some((b) => +b > 150);
+    function canfutureBlockPainted(futureBlockArray) {
+      console.log(futureBlockArray);
+      return !futureBlockArray.some((b) => alreadyBlockThere(b));
+    }
+
+    function alreadyBlockThere(futureBlock) {
+      const futureBlockColor = window
+        .getComputedStyle(
+          document.querySelector(`.tetris__gridItem[data-id="${futureBlock}"]`)
+        )
+        .getPropertyValue("background-color");
+
+      console.log(futureBlockColor);
+      return futureBlockColor !== "rgb(255, 255, 255)";
     }
   }
 }
 
-function getLastDigitString() {
-  return (firstDigitString = currentBlockArray
-    .map((b) => +b % 10)
-    .reduce((string, b) => (string += b), ""));
-}
+function isFutureBlockOverGameMap(futureBlockArray) {
+  return isBlockOnRightWall() || isBlockOnLeftWall() || isBlockOnBottomWall()
+    ? true
+    : false;
 
-function getFirstTwoDigitString() {
-  return currentBlockArray
-    .map((b) => Math.floor(+b / 10))
-    .reduce((string, b) => (string += b), "");
+  function isBlockOnRightWall() {
+    return (
+      currentBlockArray.some((b) => b % 10 === 0) &&
+      futureBlockArray.some((b) => b % 10 === 1)
+    );
+  }
+
+  function isBlockOnLeftWall() {
+    return (
+      currentBlockArray.some((b) => b % 10 === 1) &&
+      futureBlockArray.some((b) => b % 10 === 0)
+    );
+  }
+
+  function isBlockOnBottomWall() {
+    return futureBlockArray.some((b) => +b > 150);
+  }
 }
 
 function moveBlockDownPerSecond() {
@@ -232,7 +224,6 @@ function moveBlockDownPerSecond() {
     turn = false;
   }
 }
-// moveBlockDownPerSecond();
 
 function blockSave() {
   console.log(interval);
@@ -252,4 +243,3 @@ function blockSave() {
     }
   }
 }
-// blockSave();

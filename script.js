@@ -14,6 +14,7 @@ let currentBlockArray;
 // 임시로 squre.. 나중에 랜덤으로 바꾸자
 let currentBlockShape = "squre";
 let currentKeyPress;
+let lastSavedBlockNumberArray;
 let turn = true;
 let interval;
 
@@ -235,11 +236,59 @@ function blockSave() {
       // blocktype을 여기서 바꿀게끔..
       // currentBlockShape = '';
       turn = true;
+      lastSavedBlockNumberArray = currentBlockArray;
+
       makeNewBlock();
-      // moveBlockDownPerSecond();
+      moveBlockDownPerSecond();
       // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
       blockSave();
+      removefullColorLine();
       // **************** canMove에 색칠된 박스가 바로 밑에 있으면 false를 return하게 끔 만들어야 함 그래야 누적이 됨 ***********************
     }
+  }
+}
+
+function removefullColorLine() {
+  let full = false;
+  console.log(lastSavedBlockNumberArray);
+  let BlockLine = lastSavedBlockNumberArray.map((b) =>
+    b / 10 === 0 ? 0 : Math.floor(b / 10)
+  );
+  console.log(BlockLine);
+  BlockLine = [...new Set(BlockLine)];
+  console.log(BlockLine);
+
+  BlockLine.map((bl) => {
+    const BlockLineNumberArray = [];
+    console.log(BlockLineNumberArray);
+    for (let i = 1; i < 11; i++) {
+      BlockLineNumberArray.push(bl !== 0 ? bl * 10 + i : 11 - i);
+    }
+    full = CheckFullColorLine(BlockLineNumberArray);
+    console.log(full);
+    if (full) removeBlockLine(BlockLineNumberArray);
+    // moveEntireblockToDown(); 만들어야 할 기능 따로 배서 함수로 사용하게 하자
+  });
+
+  function CheckFullColorLine(NumberArray) {
+    return !NumberArray.some((b) => isWhiteBlock(b));
+  }
+
+  function isWhiteBlock(blockNumber) {
+    const BlockColor = window
+      .getComputedStyle(
+        document.querySelector(`.tetris__gridItem[data-id="${blockNumber}"]`)
+      )
+      .getPropertyValue("background-color");
+
+    return BlockColor === "rgb(255, 255, 255)";
+  }
+
+  function removeBlockLine(NumberArray) {
+    NumberArray.map((b) => {
+      document.querySelector(
+        `.tetris__gridItem[data-id="${b}"]`
+      ).style.backgroundColor = "white";
+    });
   }
 }

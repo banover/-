@@ -249,26 +249,42 @@ function blockSave() {
 }
 
 function removefullColorLine() {
-  let full = false;
-  console.log(lastSavedBlockNumberArray);
-  let BlockLine = lastSavedBlockNumberArray.map((b) =>
-    b / 10 === 0 ? 0 : Math.floor(b / 10)
-  );
-  console.log(BlockLine);
-  BlockLine = [...new Set(BlockLine)];
-  console.log(BlockLine);
+  const blockLine = getBlockLine();
+  let blockLineState = getStateOfBlockLineColor(blockLine);
+  console.log(blockLineState);
+  removeBlockLineFullOfColor(blockLineState);
 
-  BlockLine.map((bl) => {
-    const BlockLineNumberArray = [];
-    console.log(BlockLineNumberArray);
-    for (let i = 1; i < 11; i++) {
-      BlockLineNumberArray.push(bl !== 0 ? bl * 10 + i : 11 - i);
-    }
-    full = CheckFullColorLine(BlockLineNumberArray);
-    console.log(full);
-    if (full) removeBlockLine(BlockLineNumberArray);
-    // moveEntireblockToDown(); 만들어야 할 기능 따로 배서 함수로 사용하게 하자
-  });
+  // moveEntireblockToDown(); 만들어야 할 기능 따로 배서 함수로 사용하게 하자
+
+  function getBlockLine() {
+    console.log(lastSavedBlockNumberArray);
+    let result = lastSavedBlockNumberArray
+      .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
+      .filter((b) => b < 15);
+
+    console.log(result);
+    return [...new Set(result)];
+  }
+
+  function getStateOfBlockLineColor(blockLine) {
+    const result = [];
+    blockLine.map((bl) => {
+      const blockLineNumberArray = [];
+      console.log(blockLineNumberArray);
+      console.log(bl);
+      for (let i = 1; i < 11; i++) {
+        blockLineNumberArray.push(bl !== 0 ? bl * 10 + i : 11 - i);
+      }
+      console.log(blockLineNumberArray);
+      const isfull = CheckFullColorLine(blockLineNumberArray);
+      result.push({
+        blockLine: `${bl}`,
+        full: `${isfull}`,
+        blockLineNumberArray,
+      });
+    });
+    return result;
+  }
 
   function CheckFullColorLine(NumberArray) {
     return !NumberArray.some((b) => isWhiteBlock(b));
@@ -284,8 +300,17 @@ function removefullColorLine() {
     return BlockColor === "rgb(255, 255, 255)";
   }
 
-  function removeBlockLine(NumberArray) {
-    NumberArray.map((b) => {
+  function removeBlockLineFullOfColor(blockLineState) {
+    blockLineState.map((block) => {
+      console.log(block);
+      if (block.full === "true") {
+        removeBlockLine(block.blockLineNumberArray);
+      }
+    });
+  }
+
+  function removeBlockLine(numberArray) {
+    numberArray.map((b) => {
       document.querySelector(
         `.tetris__gridItem[data-id="${b}"]`
       ).style.backgroundColor = "white";

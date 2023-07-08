@@ -18,8 +18,10 @@ let lastSavedBlockNumberArray;
 let maxHeightBlockLine = 14;
 let removedBlockLine = [];
 let blockColorArray = [];
+let shouldBeRemoved;
 let turn = true;
 let interval;
+let gameOver = false;
 
 function playGame(e) {
   // console.log(e);
@@ -299,6 +301,7 @@ function blockSave() {
   // 아니면 가만히 냅두면 정상작동인데 블락제거될때 방향키 막 좌우로 누르면 버그가 발생함..원인은???
 
   function checkMovingBlock() {
+    let result;
     if (!interval && !turn) {
       clearInterval(setIntervalCheckMovingBlock);
       // blocktype을 여기서 바꿀게끔..
@@ -316,10 +319,13 @@ function blockSave() {
       // ****************************************************************************************************
       makeNewBlock();
       moveBlockDownPerSecond();
-      // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
+      // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
       blockSave();
       removefullColorLine();
       moveAboveRemovedBlockToDown();
+      // blockSave 함수가 setInterval을 활용해서 block이 바닥에 도착하면 그 다음 단계로 넘어가게 해준다.
+      // removefullColorLine,moveAboveRemovedBlockToDown를 따로 분리할 방법이 없을까?
+      // removefullColorLine,moveAboveRemovedBlockToDown실행 후, moveBlockDownPerSecond하기 전에 움직이면 버그가 난다.
     }
   }
 }
@@ -349,6 +355,9 @@ function removefullColorLine() {
       console.log(blockLineNumberArray);
 
       const isfull = CheckFullColorLine(blockLineNumberArray);
+      if (isfull) {
+        shouldBeRemoved = true;
+      }
       result.push({
         blockLine: `${bl}`,
         full: `${isfull}`,
@@ -373,13 +382,15 @@ function removefullColorLine() {
   }
 
   function removeBlockLineFullOfColor(blockLineData) {
-    blockLineData.map((block) => {
-      console.log(block);
-      if (block.full === "true") {
-        removeBlockLine(block.blockLineNumberArray);
-        removedBlockLine.push(block.blockLine);
-      }
-    });
+    if (shouldBeRemoved) {
+      blockLineData.map((block) => {
+        console.log(block);
+        if (block.full === "true") {
+          removeBlockLine(block.blockLineNumberArray);
+          removedBlockLine.push(block.blockLine);
+        }
+      });
+    }
   }
 
   function removeBlockLine(numberArray) {
@@ -395,7 +406,6 @@ function getBlockLineNumberArray(blockLine) {
   const result = [];
   for (let i = 1; i < 11; i++) {
     result.push(blockLine !== 0 ? blockLine * 10 + i : i);
-    // 11-i에서 i로 변화줌
   }
   console.log(result);
   return result;
@@ -407,6 +417,7 @@ function getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray) {
     .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
     .filter((b) => b < 15);
 }
+// 여기서 버그**********************************************************
 
 function moveAboveRemovedBlockToDown() {
   const blockLineTodown = removedBlockLine.length;
@@ -418,7 +429,7 @@ function moveAboveRemovedBlockToDown() {
   const minRemovedBlockLine = Math.min(...removedBlockLine);
   console.log(minRemovedBlockLine);
   const numberOfBlockLine = boundryToDown - boundryToTop + 1;
-  if (removedBlockLine.length > 0 && minRemovedBlockLine > boundryToTop) {
+  if (blockLineTodown > 0 && minRemovedBlockLine > boundryToTop) {
     console.log(minRemovedBlockLine);
     console.log(removedBlockLine.length);
     // 위 조건문 보강해야!!!!!!!!!!!!!!!!!!!
@@ -462,7 +473,34 @@ function moveAboveRemovedBlockToDown() {
 
     removedBlockLine = [];
     currentBlockShape = "squre";
+    maxHeightBlockLine = getMaxHeightBlockLine();
     // currentKeyPress === "ArrowDown";
   }
   return;
+}
+
+function getMaxHeightBlockLine() {
+  // 기존의 maxHeightBlockLine에서
+  // 한줄씩 내려가면서 색깔이 있는 블락을 다음 maxheightBlockline으로 설정
+  let result;
+  let BlockLineForCheck = maxHeightBlockLine + 1;
+  for (let blockLine = BlockLineForCheck; blockLine < 15; blockLine++) {
+    const BlockNumberArrayForCheck = getBlockLineNumberArray(blockLine);
+    const isAllWhite = !BlockNumberArrayForCheck.some((b) => {
+      const blockColor = window
+        .getComputedStyle(
+          document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
+        )
+        .getPropertyValue("background-color");
+      console.log(blockColor);
+      return blockColor !== "rgb(255, 255, 255)";
+    });
+    console.log(isAllWhite);
+    if (isAllWhite === false) {
+      result = blockLine;
+      console.log(result);
+      break;
+    }
+  }
+  return result;
 }

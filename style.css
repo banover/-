@@ -20,10 +20,15 @@ body {
   transform: translate(-50%, -50%);
 }
 
-.tetris__Btn {
+.tetris__menu {
+  display: flex;
+}
+
+.tetris__upperBanner {
   color: white;
   padding: 1rem 1rem;
   background-color: #777;
+  width: 100%;
 }
 
 .tetris__playingBtn {
@@ -46,7 +51,7 @@ body {
   border-right: 1px solid white; */
 
   position: absolute;
-  top: 50%;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
 
@@ -63,4 +68,11 @@ body {
   height: 2rem;
   background-color: white;
   border: 0.1px inset rgba(0, 0, 0, 0.5);
+}
+
+.tetris__scoreBox {
+  width: 10rem;
+  height: auto;
+  font-size: 2rem;
+  color: white;
 }

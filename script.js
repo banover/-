@@ -21,7 +21,8 @@ let blockColorArray = [];
 let shouldBeRemoved;
 let turn = true;
 let interval;
-let gameOver = false;
+let score = 0;
+// let gameOver = false;
 
 function playGame(e) {
   // console.log(e);
@@ -314,7 +315,8 @@ function blockSave() {
       }
       // ****************************************************************************************************
       removefullColorLine();
-      moveAboveRemovedBlockToDown();
+      moveAllBlockLineToBottom();
+      renderScore();
       startNextBlcok();
       // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
     }
@@ -385,6 +387,7 @@ function removefullColorLine() {
         if (block.full === "true") {
           removeBlockLine(block.blockLineNumberArray);
           removedBlockLine.push(block.blockLine);
+          score += 5;
         }
       });
     }
@@ -416,7 +419,7 @@ function getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray) {
 }
 // 여기서 버그**********************************************************
 
-function moveAboveRemovedBlockToDown() {
+function moveAllBlockLineToBottom() {
   const numberOfBlockLineTodown = removedBlockLine.length;
   const boundryToDown = +removedBlockLine[0] - 1;
   console.log(boundryToDown);
@@ -503,4 +506,9 @@ function getMaxHeightBlockLine() {
     }
   }
   return result;
+}
+
+function renderScore() {
+  const scoreElement = document.querySelector(".tetris__scoreBox");
+  scoreElement.textContent = `점수: ${score}`;
 }

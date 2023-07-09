@@ -294,11 +294,7 @@ function moveBlockDownPerSecond() {
 
 function blockSave() {
   console.log(interval);
-  const setIntervalCheckMovingBlock = setInterval(checkMovingBlock, 1000);
-  // setInterval에 대해 고민해 보자!! 버그가 있다.
-  // 내 생각에는 current방향 설정하지 말고 고정시키고 move down시켜야할듯
-  // 안그러니까 방향키누를때마다 아다리 잘못 맞으면 걍 무브다운이 안되고 이상한 짓 한다.
-  // 아니면 가만히 냅두면 정상작동인데 블락제거될때 방향키 막 좌우로 누르면 버그가 발생함..원인은???
+  const setIntervalCheckMovingBlock = setInterval(checkMovingBlock, 500);
 
   function checkMovingBlock() {
     let result;
@@ -317,15 +313,16 @@ function blockSave() {
         maxHeightBlockLine = smallestBlockLine;
       }
       // ****************************************************************************************************
-      makeNewBlock();
-      moveBlockDownPerSecond();
-      // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
-      blockSave();
       removefullColorLine();
       moveAboveRemovedBlockToDown();
-      // blockSave 함수가 setInterval을 활용해서 block이 바닥에 도착하면 그 다음 단계로 넘어가게 해준다.
-      // removefullColorLine,moveAboveRemovedBlockToDown를 따로 분리할 방법이 없을까?
-      // removefullColorLine,moveAboveRemovedBlockToDown실행 후, moveBlockDownPerSecond하기 전에 움직이면 버그가 난다.
+      startNextBlcok();
+      // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
+    }
+
+    function startNextBlcok() {
+      makeNewBlock();
+      moveBlockDownPerSecond();
+      blockSave();
     }
   }
 }
@@ -420,8 +417,7 @@ function getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray) {
 // 여기서 버그**********************************************************
 
 function moveAboveRemovedBlockToDown() {
-  const blockLineTodown = removedBlockLine.length;
-  console.log(removedBlockLine);
+  const numberOfBlockLineTodown = removedBlockLine.length;
   const boundryToDown = +removedBlockLine[0] - 1;
   console.log(boundryToDown);
   const boundryToTop = maxHeightBlockLine;
@@ -429,54 +425,58 @@ function moveAboveRemovedBlockToDown() {
   const minRemovedBlockLine = Math.min(...removedBlockLine);
   console.log(minRemovedBlockLine);
   const numberOfBlockLine = boundryToDown - boundryToTop + 1;
-  if (blockLineTodown > 0 && minRemovedBlockLine > boundryToTop) {
-    console.log(minRemovedBlockLine);
-    console.log(removedBlockLine.length);
-    // 위 조건문 보강해야!!!!!!!!!!!!!!!!!!!
-    // 이후 removedBlockLine 비워둘 것
 
-    // const totalNumberOfDownBlock = boundryToDown -boundryToTop;
-    // for (let i = 0; i < blockLineTodown; i++) {
-    console.log(numberOfBlockLine);
+  if (numberOfBlockLineTodown > 0 && isThereDowningBlock) {
+    moveRemainBlockDown();
+    resetGameData();
+  }
+
+  function moveRemainBlockDown() {
     for (let i = 0; i < numberOfBlockLine; i++) {
       const targetBlockLine = boundryToDown - i;
       const targetBlockLineNumberArray =
         getBlockLineNumberArray(targetBlockLine);
       console.log(targetBlockLineNumberArray);
 
-      // block 색 기억해두기
-      blockColorArray = [];
-      targetBlockLineNumberArray.map((b) => {
-        const blockColor = window
-          .getComputedStyle(
-            document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
-          )
-          .getPropertyValue("background-color");
-        console.log(blockColor);
-        blockColorArray.push(blockColor);
-      });
-      console.log(blockColorArray);
+      getBlockLineColors();
+      moveTargetBlockLineToDown();
 
-      currentKeyPress === "ArrowDown";
-      currentBlockArray = targetBlockLineNumberArray;
-      currentBlockShape = "blockLine";
-      for (let i = 0; i < removedBlockLine.length; i++) {
-        moveBlock();
-        currentBlockArray = currentBlockArray.map((b) => +b + 10);
-        console.log("한줄이동성공");
-        // 한칸 이동한 만큼 current block array도 한칸 내려서 다음 for문도 정상적으로 수행하게 한다.
+      function getBlockLineColors() {
+        blockColorArray = [];
+        targetBlockLineNumberArray.map((b) => {
+          const blockColor = window
+            .getComputedStyle(
+              document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
+            )
+            .getPropertyValue("background-color");
+          console.log(blockColor);
+          blockColorArray.push(blockColor);
+        });
+        console.log(blockColorArray);
       }
-      // moveBlock();
 
-      // makeNewBlock과 canMove를 손봐서 remove된 곳을 fill할 수 있게, 이동할 수 있게 만들기!!!
+      function moveTargetBlockLineToDown() {
+        currentBlockArray = targetBlockLineNumberArray;
+        currentBlockShape = "blockLine";
+        for (let i = 0; i < removedBlockLine.length; i++) {
+          currentKeyPress = "ArrowDown";
+          moveBlock();
+          currentBlockArray = currentBlockArray.map((b) => +b + 10);
+          console.log("한줄이동성공");
+        }
+      }
     }
+  }
 
+  function resetGameData() {
     removedBlockLine = [];
     currentBlockShape = "squre";
     maxHeightBlockLine = getMaxHeightBlockLine();
-    // currentKeyPress === "ArrowDown";
   }
-  return;
+
+  function isThereDowningBlock() {
+    return minRemovedBlockLine > boundryToTop;
+  }
 }
 
 function getMaxHeightBlockLine() {

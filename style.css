@@ -4,37 +4,45 @@
   box-sizing: border-box;
 }
 
-body {
+html {
   font-size: 62.5%;
+}
+
+body {
   background-color: rgba(0, 128, 0, 0.164);
 }
 
 .tetris {
   background-color: black;
-  width: 50rem;
-  height: 40rem;
+  width: 70rem;
+  height: 60rem;
 
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  /* z-index: 999; */
 }
 
 .tetris__menu {
-  display: flex;
+  /* z-index: 99; */
 }
 
 .tetris__upperBanner {
+  display: flex;
+  align-items: center;
   color: white;
   padding: 1rem 1rem;
   background-color: #777;
   width: 100%;
+  height: 7rem;
 }
 
 .tetris__playingBtn {
   padding: 0.8rem 2rem;
   border: 1px solid black;
   cursor: pointer;
+  /* background-color: none; */
 }
 
 .tetris__checkBtn {
@@ -43,17 +51,21 @@ body {
 }
 
 .tetris__inGameBox {
-  width: 20rem;
-  height: 30rem;
-  background-color: rgba(255, 255, 255, 0.493);
+  width: 30rem;
+  height: 45rem;
+  /* background-color: rgba(255, 255, 255, 0.493); */
+  background-color: black;
   /* border-left: 1px solid white;
   border-bottom: 1px solid white;
   border-right: 1px solid white; */
 
-  position: absolute;
-  top: 55%;
+  position: relative;
+  /* top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); */
+  top: 5%;
+  left: 50%;
+  transform: translate(-50%, 0);
 
   display: grid;
   grid-template-columns: repeat(10, 1fr);
@@ -64,10 +76,12 @@ body {
 }
 
 .tetris__gridItem {
-  width: 2rem;
-  height: 2rem;
+  width: 3rem;
+  height: 3rem;
   background-color: white;
-  border: 0.1px inset rgba(0, 0, 0, 0.5);
+  /* border: 0.1px inset rgba(0, 0, 0, 0.5); */
+  border: 0.1px solid rgba(0, 0, 0, 0.5);
+  /* z-index: 99; */
 }
 
 .tetris__scoreBox {
@@ -75,4 +89,24 @@ body {
   height: auto;
   font-size: 2rem;
   color: white;
+}
+
+.tetris__gameOverModal {
+  width: 100%;
+  height: 53rem;
+  /* height: 100%; */
+  background-color: white;
+
+  position: absolute;
+  top: 7rem;
+  left: 0;
+  opacity: 0.6;
+
+  font-size: 6rem;
+  font-weight: 600;
+  text-align: center;
+  padding-top: 20rem;
+  /* z-index: 98; */
+
+  display: none;
 }

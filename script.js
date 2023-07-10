@@ -4,6 +4,7 @@ const checkBtn = document.querySelector(".tetris__checkBtn");
 const nextItemBox = document.querySelector(".tetris__nextItemBox");
 const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
+const modal = document.querySelector(".tetris__gameOverModal");
 
 const CENTER_POSITION_NUMBER = 5;
 
@@ -44,6 +45,9 @@ function makeGameMap() {
     const gridCell = document.createElement("div");
     gridCell.classList.add("tetris__gridItem");
     gridCell.setAttribute("data-id", i + 1);
+    if (i < 10) {
+      gridCell.style.visibility = "hidden";
+    }
     playingBox.append(gridCell);
   }
 }
@@ -66,6 +70,9 @@ function makeNewBlock(blockNumberArray) {
 
 function makeSqure(blockNumberArray) {
   makeSqureShape(blockNumberArray);
+  // 여기서 만들려는 곳에 이미 block이 있으면 만들지 않고 gameover 변수 true로 바꾸는 등으로 게임의 끝을 알리자
+  isGameContinue();
+
   paintBlock("red");
 
   // makeShape를 따로 빼서 재사용할 것이냐...
@@ -82,10 +89,29 @@ function makeSqure(blockNumberArray) {
     currentBlockShape = "squre";
     currentBlockArray = blockNumber;
   }
+
+  function isGameContinue() {
+    const isInitiallPlaceEmpty = !currentBlockArray.some((b) => {
+      const blockColor = window
+        .getComputedStyle(
+          document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
+        )
+        .getPropertyValue("background-color");
+
+      return blockColor !== "rgb(255, 255, 255)";
+    });
+
+    if (!isInitiallPlaceEmpty) {
+      gameOver();
+    }
+  }
+
+  function gameOver() {
+    modal.style.display = "block";
+  }
 }
 
 function makeBlockLine(blockNumberArray) {
-  // currentBlockArray을 가져오기 까지는 성공 하지만, 색을 칠해야함, 미리 만들어 둔 것은 다 색칠하는 함수임..
   paintBlockLine("red");
   console.log("makeblockline 진입성공");
   console.log(blockNumberArray);
@@ -167,7 +193,6 @@ function makeNewBlockNumberArray() {
 function canMove() {
   console.log("canMove 진입");
   // 추후에 블락들 추가될고 arrowup key에 따른 변화도 동일하다면... blockshape지우는 리팩토링
-  // return currentBlockShape === "squre" && canFutureBlockMove() ? true : false;
 
   if (currentBlockShape === "squre" && canFutureBlockMove()) return true;
   if (currentBlockShape === "blockLine" && canFutureBlockMove()) return true;
@@ -177,26 +202,6 @@ function canMove() {
     console.log("canFutureBlockMove진입");
     const futureBlockArray = makeFutureBlockArray();
     return checkFutureBlockcanMove(futureBlockArray);
-
-    // function makeFutureBlockArray() {
-    //   if (currentKeyPress === "ArrowLeft") {
-    //     return currentBlockArray
-    //       .map((b) => +b - 1)
-    //       .filter((b) => !currentBlockArray.includes(`${b}`));
-    //   }
-
-    //   if (currentKeyPress === "ArrowRight") {
-    //     return currentBlockArray
-    //       .map((b) => +b + 1)
-    //       .filter((b) => !currentBlockArray.includes(`${b}`));
-    //   }
-
-    //   if (currentKeyPress === "ArrowDown") {
-    //     return currentBlockArray
-    //       .map((b) => +b + 10)
-    //       .filter((b) => !currentBlockArray.includes(`${b}`));
-    //   }
-    // }
 
     function checkFutureBlockcanMove(futureBlockArray) {
       console.log("checkFutureBlockcanMove진입");

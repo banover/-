@@ -7,23 +7,25 @@ const scoreBox = document.querySelector(".tetris__scoreBox");
 const modal = document.querySelector(".tetris__gameOverModal");
 
 const CENTER_POSITION_NUMBER = 5;
+const MAX_HEIGHT_OF_GAME_MAP = 14;
+const DEFAULT_SCORE = 0;
 
 // 배열로 만들어 놨다가 추후에 random으로 currentBlockShape으로 값 넘겨주기
 const blockShape = ["squre"];
 
 let currentBlockArray;
 // 임시로 squre.. 나중에 랜덤으로 바꾸자
-let currentBlockShape = "squre";
+let currentBlockType;
 let currentKeyPress;
 let lastSavedBlockNumberArray;
-let maxHeightBlockLine = 14;
+let maxHeightBlockLine = MAX_HEIGHT_OF_GAME_MAP;
 let removedBlockLine = [];
 let blockColorArray = [];
 let shouldBeRemoved;
 let turn = true;
-let interval;
-let score = 0;
-// let gameOver = false;
+let isBlockGoingDown;
+let score = DEFAULT_SCORE;
+let gameRunning = false;
 
 function playGame(e) {
   // console.log(e);
@@ -34,7 +36,7 @@ function playGame(e) {
 // 게임 시작 버튼을 누르면 게임 시작
 // playingBtn.addEventListener("click", playGame);
 makeGameMap();
-inGamePlay();
+gameStart();
 
 // **********************************************************************
 // 여기서부터는 함수
@@ -42,89 +44,111 @@ inGamePlay();
 
 function makeGameMap() {
   for (let i = 0; i < 150; i++) {
+    const gridItem = makeGridItem(i);
+    appendGridItemToGameMap(gridItem);
+  }
+
+  function makeGridItem(i) {
     const gridCell = document.createElement("div");
     gridCell.classList.add("tetris__gridItem");
     gridCell.setAttribute("data-id", i + 1);
-    if (i < 10) {
-      gridCell.style.visibility = "hidden";
-    }
-    playingBox.append(gridCell);
+    // if (i < 10) {
+    //   gridCell.style.visibility = "hidden";
+    // }
+    return gridCell;
+  }
+
+  function appendGridItemToGameMap(gridItem) {
+    playingBox.append(gridItem);
   }
 }
 
-function inGamePlay() {
-  makeNewBlock();
+function gameStart() {
+  makeBlock();
   moveBlockDownPerSecond();
   keyPressHandler();
   blockSave();
 }
 
-function makeNewBlock(blockNumberArray) {
-  // 네모 박스 만들기
-  // 리팩토링 가능, 함수형으로 하나씩 분리
-  if (currentBlockShape === "squre") return makeSqure(blockNumberArray);
-  if (currentBlockShape === "blockLine") return makeBlockLine(blockNumberArray);
-
-  // 다른 모양 계속 만들기
-}
-
-function makeSqure(blockNumberArray) {
-  makeSqureShape(blockNumberArray);
-  // 여기서 만들려는 곳에 이미 block이 있으면 만들지 않고 gameover 변수 true로 바꾸는 등으로 게임의 끝을 알리자
-  isGameContinue();
-
+function makeBlock(blockNumberArray) {
+  if (isBlockTypeBlockLine()) return makeBlockLine(blockNumberArray);
+  selectTypeOfBlock(blockNumberArray);
+  makeBlockTypeShape(blockNumberArray);
+  if (!canBlockExist()) return gameOver();
   paintBlock("red");
 
-  // makeShape를 따로 빼서 재사용할 것이냐...
-  function makeSqureShape(blockNumberArray) {
-    const blockNumber = blockNumberArray
-      ? blockNumberArray
-      : [
-          `${CENTER_POSITION_NUMBER}`,
-          `${CENTER_POSITION_NUMBER + 1}`,
-          `${CENTER_POSITION_NUMBER + 10}`,
-          `${CENTER_POSITION_NUMBER + 11}`,
-        ];
-    console.log(blockNumber);
-    currentBlockShape = "squre";
-    currentBlockArray = blockNumber;
+  function isBlockTypeBlockLine() {
+    return currentBlockType === "blockLine";
   }
 
-  function isGameContinue() {
-    const isInitiallPlaceEmpty = !currentBlockArray.some((b) => {
-      const blockColor = window
-        .getComputedStyle(
-          document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
-        )
-        .getPropertyValue("background-color");
+  function makeBlockLine(blockNumberArray) {
+    paintBlockLine("red");
+    console.log("makeblockline 진입성공");
+    console.log(blockNumberArray);
 
-      return blockColor !== "rgb(255, 255, 255)";
-    });
-
-    if (!isInitiallPlaceEmpty) {
-      gameOver();
+    function paintBlockLine() {
+      blockNumberArray.map((item, index) => {
+        const miniBlock = document.querySelector(
+          `.tetris__gridItem[data-id="${item}"]`
+        );
+        miniBlock.style.backgroundColor = blockColorArray[index];
+      });
+      // blockColorArray = [];
     }
   }
 
-  function gameOver() {
-    modal.style.display = "block";
+  function selectTypeOfBlock(blockNumberArray) {
+    currentBlockType = blockNumberArray
+      ? currentBlockType
+      : getRandomBlockType();
+  }
+
+  function getRandomBlockType() {
+    const blockType = ["squre"];
+    const randomNumber = Math.floor(Math.random() * blockType.length);
+    const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
+    return blockType[blockTypeNumber];
   }
 }
 
-function makeBlockLine(blockNumberArray) {
-  paintBlockLine("red");
-  console.log("makeblockline 진입성공");
-  console.log(blockNumberArray);
+function makeBlockTypeShape(blockNumberArray) {
+  if (currentBlockType === "squre") return makeSqureShape(blockNumberArray);
+  // blockType마다 함수 실행시키기
+}
 
-  function paintBlockLine() {
-    blockNumberArray.map((item, index) => {
-      const miniBlock = document.querySelector(
-        `.tetris__gridItem[data-id="${item}"]`
-      );
-      miniBlock.style.backgroundColor = blockColorArray[index];
-    });
-    // blockColorArray = [];
-  }
+function makeSqureShape(blockNumberArray) {
+  const blockNumber = blockNumberArray
+    ? blockNumberArray
+    : [
+        `${CENTER_POSITION_NUMBER}`,
+        `${CENTER_POSITION_NUMBER + 1}`,
+        `${CENTER_POSITION_NUMBER + 10}`,
+        `${CENTER_POSITION_NUMBER + 11}`,
+      ];
+  console.log(blockNumber);
+  currentBlockType = "squre";
+  currentBlockArray = blockNumber;
+}
+
+function canBlockExist() {
+  return isThereEmptySpace();
+}
+
+function isThereEmptySpace() {
+  return !currentBlockArray.some((b) => {
+    const blockColor = window
+      .getComputedStyle(
+        document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
+      )
+      .getPropertyValue("background-color");
+
+    return blockColor !== "rgb(255, 255, 255)";
+  });
+}
+
+function gameOver() {
+  modal.style.display = "block";
+  gameRunning = true;
 }
 
 function paintBlock(color) {
@@ -155,7 +179,7 @@ function keyPressHandler() {
 
 function moveBlock() {
   removeCurrentBlock();
-  makeNewBlock(makeNewBlockNumberArray());
+  makeBlock(makeNewBlockNumberArray());
 }
 
 function removeCurrentBlock() {
@@ -171,7 +195,7 @@ function removeCurrentBlock() {
 function makeNewBlockNumberArray() {
   console.log(currentKeyPress);
   console.log(canMove());
-  if (currentBlockShape === "squre" && canMove()) {
+  if (currentBlockType === "squre" && canMove()) {
     if (currentKeyPress === "ArrowRight")
       return currentBlockArray.map((b) => `${+b + 1}`);
     if (currentKeyPress === "ArrowLeft")
@@ -182,7 +206,7 @@ function makeNewBlockNumberArray() {
       return currentBlockArray.map((b) => `${+b + 10}`);
   }
 
-  if (currentBlockShape === "blockLine" && canMove()) {
+  if (currentBlockType === "blockLine" && canMove()) {
     if (currentKeyPress === "ArrowDown")
       console.log("makeNewBlockNumberArray 진입성공");
     return currentBlockArray.map((b) => `${+b + 10}`);
@@ -194,8 +218,8 @@ function canMove() {
   console.log("canMove 진입");
   // 추후에 블락들 추가될고 arrowup key에 따른 변화도 동일하다면... blockshape지우는 리팩토링
 
-  if (currentBlockShape === "squre" && canFutureBlockMove()) return true;
-  if (currentBlockShape === "blockLine" && canFutureBlockMove()) return true;
+  if (currentBlockType === "squre" && canFutureBlockMove()) return true;
+  if (currentBlockType === "blockLine" && canFutureBlockMove()) return true;
   return false;
 
   function canFutureBlockMove() {
@@ -205,7 +229,7 @@ function canMove() {
 
     function checkFutureBlockcanMove(futureBlockArray) {
       console.log("checkFutureBlockcanMove진입");
-      if (currentBlockShape === "blockLine") {
+      if (currentBlockType === "blockLine") {
         return canfutureBlockPainted(futureBlockArray);
       }
 
@@ -283,7 +307,7 @@ function isFutureBlockOverGameMap(futureBlockArray) {
 }
 
 function moveBlockDownPerSecond() {
-  interval = true;
+  isBlockGoingDown = true;
   const setIntervalMoveBlockDown = setInterval(moveBlockDown, 1000);
 
   function moveBlockDown() {
@@ -293,22 +317,22 @@ function moveBlockDownPerSecond() {
 
   function clearIntervalMoveBlockDown() {
     clearInterval(setIntervalMoveBlockDown);
-    interval = false;
-    turn = false;
+    isBlockGoingDown = false;
+    // turn = false;
   }
 }
 
+// **********************************************************************************7월 11일 까지 리팩토링함 아래서 부터 다시 ㄱㄱㄱ**************************************************************
+
 function blockSave() {
-  console.log(interval);
   const setIntervalCheckMovingBlock = setInterval(checkMovingBlock, 500);
 
   function checkMovingBlock() {
-    let result;
-    if (!interval && !turn) {
+    // let result;
+    // if (!isBlockGoingDown && !turn) {
+    if (!isBlockGoingDown) {
       clearInterval(setIntervalCheckMovingBlock);
-      // blocktype을 여기서 바꿀게끔..
-      // currentBlockShape = '';
-      turn = true;
+      // turn = true;
       lastSavedBlockNumberArray = currentBlockArray;
       // 가장 높은 높이의 blockLine을 찾기 추후 block 모두 내리기에 사용****************************************
       const lastSavedBlockLines = getBlockLinesOfLastSavedBlock(
@@ -327,9 +351,14 @@ function blockSave() {
     }
 
     function startNextBlcok() {
-      makeNewBlock();
-      moveBlockDownPerSecond();
-      blockSave();
+      // selectTypeOfBlock();
+      // if (!canBlockExist()) return gameOver(); 잠시 대기 makeBlock안에 넣을 예정
+
+      makeBlock();
+      if (!gameRunning) {
+        moveBlockDownPerSecond();
+        blockSave();
+      }
     }
   }
 }
@@ -465,7 +494,7 @@ function moveAllBlockLineToBottom() {
 
       function moveTargetBlockLineToDown() {
         currentBlockArray = targetBlockLineNumberArray;
-        currentBlockShape = "blockLine";
+        currentBlockType = "blockLine";
         for (let i = 0; i < removedBlockLine.length; i++) {
           currentKeyPress = "ArrowDown";
           moveBlock();
@@ -478,7 +507,7 @@ function moveAllBlockLineToBottom() {
 
   function resetGameData() {
     removedBlockLine = [];
-    currentBlockShape = "squre";
+    currentBlockType = "squre";
     maxHeightBlockLine = getMaxHeightBlockLine();
   }
 

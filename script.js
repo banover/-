@@ -83,8 +83,6 @@ function makeBlock(blockNumberArray) {
 
   function makeBlockLine(blockNumberArray) {
     paintBlockLine("red");
-    console.log("makeblockline 진입성공");
-    console.log(blockNumberArray);
 
     function paintBlockLine() {
       blockNumberArray.map((item, index) => {
@@ -183,7 +181,6 @@ function moveBlock() {
 }
 
 function removeCurrentBlock() {
-  console.log("removeCurrentBlock 진입");
   currentBlockArray.map((b) => {
     const miniBlock = document.querySelector(
       `.tetris__gridItem[data-id="${b}"]`
@@ -193,67 +190,54 @@ function removeCurrentBlock() {
 }
 
 function makeNewBlockNumberArray() {
-  console.log(currentKeyPress);
-  console.log(canMove());
-  if (currentBlockType === "squre" && canMove()) {
+  if (currentBlockType === "blockLine" && canBlockMove()) {
+    if (currentKeyPress === "ArrowDown")
+      return currentBlockArray.map((b) => `${+b + 10}`);
+  }
+
+  if (currentBlockType === "squre" && canBlockMove()) {
     if (currentKeyPress === "ArrowRight")
       return currentBlockArray.map((b) => `${+b + 1}`);
     if (currentKeyPress === "ArrowLeft")
       return currentBlockArray.map((b) => `${+b - 1}`);
 
     if (currentKeyPress === "ArrowUp") return currentBlockArray;
+    // arrowUP에 버그 있음 확인
     if (currentKeyPress === "ArrowDown")
       return currentBlockArray.map((b) => `${+b + 10}`);
   }
 
-  if (currentBlockType === "blockLine" && canMove()) {
-    if (currentKeyPress === "ArrowDown")
-      console.log("makeNewBlockNumberArray 진입성공");
-    return currentBlockArray.map((b) => `${+b + 10}`);
-  }
   return currentBlockArray;
 }
 
-function canMove() {
-  console.log("canMove 진입");
-  // 추후에 블락들 추가될고 arrowup key에 따른 변화도 동일하다면... blockshape지우는 리팩토링
-
-  if (currentBlockType === "squre" && canFutureBlockMove()) return true;
-  if (currentBlockType === "blockLine" && canFutureBlockMove()) return true;
+function canBlockMove() {
+  if (canFutureBlockExist()) return true;
+  // if (currentBlockType === "squre" && canFutureBlockMove()) return true;
+  // if (currentBlockType === "blockLine" && canFutureBlockMove()) return true;
   return false;
 
-  function canFutureBlockMove() {
-    console.log("canFutureBlockMove진입");
+  function canFutureBlockExist() {
     const futureBlockArray = makeFutureBlockArray();
-    return checkFutureBlockcanMove(futureBlockArray);
 
-    function checkFutureBlockcanMove(futureBlockArray) {
-      console.log("checkFutureBlockcanMove진입");
-      if (currentBlockType === "blockLine") {
-        return canfutureBlockPainted(futureBlockArray);
-      }
-
-      if (isFutureBlockOverGameMap(futureBlockArray)) {
-        return false;
-      }
-      return canfutureBlockPainted(futureBlockArray);
+    if (
+      currentBlockType !== "blockLine" &&
+      isFutureBlockOverGameMap(futureBlockArray)
+    ) {
+      return false;
     }
+    return canfutureBlockPainted(futureBlockArray);
 
     function canfutureBlockPainted(futureBlockArray) {
-      console.log("canfutureBlockPainted진입");
-
-      console.log(futureBlockArray);
-      return !futureBlockArray.some((b) => alreadyBlockThere(b));
+      return !futureBlockArray.some((b) => isAlreadyBlockThere(b));
     }
 
-    function alreadyBlockThere(futureBlock) {
+    function isAlreadyBlockThere(futureBlock) {
       const futureBlockColor = window
         .getComputedStyle(
           document.querySelector(`.tetris__gridItem[data-id="${futureBlock}"]`)
         )
         .getPropertyValue("background-color");
 
-      console.log(futureBlockColor);
       return futureBlockColor !== "rgb(255, 255, 255)";
     }
   }
@@ -273,35 +257,36 @@ function makeFutureBlockArray() {
   }
 
   if (currentKeyPress === "ArrowDown") {
-    console.log("makeFutureBlockArray진입");
-    console.log(currentBlockArray);
-
     return currentBlockArray
       .map((b) => +b + 10)
       .filter((b) => !currentBlockArray.includes(`${b}`));
   }
+
+  if (currentKeyPress === "ArrowUp") return currentBlockArray;
 }
 
 function isFutureBlockOverGameMap(futureBlockArray) {
-  return isBlockOnRightWall() || isBlockOnLeftWall() || isBlockOnBottomWall()
+  return isBlockOverRightGameMap() ||
+    isBlockOverLeftGameMap() ||
+    isBlockOverBottomGameMap()
     ? true
     : false;
 
-  function isBlockOnRightWall() {
+  function isBlockOverRightGameMap() {
     return (
       currentBlockArray.some((b) => b % 10 === 0) &&
       futureBlockArray.some((b) => b % 10 === 1)
     );
   }
 
-  function isBlockOnLeftWall() {
+  function isBlockOverLeftGameMap() {
     return (
       currentBlockArray.some((b) => b % 10 === 1) &&
       futureBlockArray.some((b) => b % 10 === 0)
     );
   }
 
-  function isBlockOnBottomWall() {
+  function isBlockOverBottomGameMap() {
     return futureBlockArray.some((b) => +b > 150);
   }
 }
@@ -312,7 +297,7 @@ function moveBlockDownPerSecond() {
 
   function moveBlockDown() {
     currentKeyPress = "ArrowDown";
-    !canMove() ? clearIntervalMoveBlockDown() : moveBlock();
+    canBlockMove() ? moveBlock() : clearIntervalMoveBlockDown();
   }
 
   function clearIntervalMoveBlockDown() {
@@ -322,17 +307,24 @@ function moveBlockDownPerSecond() {
   }
 }
 
-// **********************************************************************************7월 11일 까지 리팩토링함 아래서 부터 다시 ㄱㄱㄱ**************************************************************
-
 function blockSave() {
-  const setIntervalCheckMovingBlock = setInterval(checkMovingBlock, 500);
+  const setIntervalCheckBlockIsStop = setInterval(checkBlockIsStop, 500);
 
-  function checkMovingBlock() {
-    // let result;
+  function checkBlockIsStop() {
     // if (!isBlockGoingDown && !turn) {
     if (!isBlockGoingDown) {
-      clearInterval(setIntervalCheckMovingBlock);
+      clearInterval(setIntervalCheckBlockIsStop);
       // turn = true;
+      setDataAboutLastSavedBlock();
+      // ************************************************************************************************* 이 아래서 부터 다시 refactoring 시작***
+      removefullColorLine();
+      moveAllBlockLineToBottom();
+      renderScore();
+      startNextBlcok();
+      // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
+    }
+
+    function setDataAboutLastSavedBlock() {
       lastSavedBlockNumberArray = currentBlockArray;
       // 가장 높은 높이의 blockLine을 찾기 추후 block 모두 내리기에 사용****************************************
       const lastSavedBlockLines = getBlockLinesOfLastSavedBlock(
@@ -342,12 +334,6 @@ function blockSave() {
       if (smallestBlockLine < maxHeightBlockLine) {
         maxHeightBlockLine = smallestBlockLine;
       }
-      // ****************************************************************************************************
-      removefullColorLine();
-      moveAllBlockLineToBottom();
-      renderScore();
-      startNextBlcok();
-      // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
     }
 
     function startNextBlcok() {

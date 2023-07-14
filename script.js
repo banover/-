@@ -18,6 +18,7 @@ let currentBlockArray;
 let currentBlockType;
 let currentKeyPress;
 let lastSavedBlockNumberArray;
+let lastSavedBlockLine;
 let maxHeightBlockLine = MAX_HEIGHT_OF_GAME_MAP;
 let removedBlockLine = [];
 let blockColorArray = [];
@@ -25,7 +26,7 @@ let shouldBeRemoved;
 let turn = true;
 let isBlockGoingDown;
 let score = DEFAULT_SCORE;
-let gameRunning = false;
+let gameRunning = true;
 
 function playGame(e) {
   // console.log(e);
@@ -146,7 +147,7 @@ function isThereEmptySpace() {
 
 function gameOver() {
   modal.style.display = "block";
-  gameRunning = true;
+  gameRunning = false;
 }
 
 function paintBlock(color) {
@@ -164,7 +165,7 @@ function keyPressHandler() {
 
     function isArrowKeyPressed(key) {
       currentKeyPress = key;
-      console.log(key);
+
       return (
         currentKeyPress === "ArrowRight" ||
         currentKeyPress === "ArrowLeft" ||
@@ -191,8 +192,7 @@ function removeCurrentBlock() {
 
 function makeNewBlockNumberArray() {
   if (currentBlockType === "blockLine" && canBlockMove()) {
-    if (currentKeyPress === "ArrowDown")
-      return currentBlockArray.map((b) => `${+b + 10}`);
+    return currentBlockArray.map((b) => `${+b + 10}`);
   }
 
   if (currentBlockType === "squre" && canBlockMove()) {
@@ -316,7 +316,6 @@ function blockSave() {
       clearInterval(setIntervalCheckBlockIsStop);
       // turn = true;
       setDataAboutLastSavedBlock();
-      // ************************************************************************************************* 이 아래서 부터 다시 refactoring 시작***
       removefullColorLine();
       moveAllBlockLineToBottom();
       renderScore();
@@ -330,6 +329,8 @@ function blockSave() {
       const lastSavedBlockLines = getBlockLinesOfLastSavedBlock(
         lastSavedBlockNumberArray
       );
+
+      lastSavedBlockLine = lastSavedBlockLines;
       const smallestBlockLine = Math.min(...lastSavedBlockLines);
       if (smallestBlockLine < maxHeightBlockLine) {
         maxHeightBlockLine = smallestBlockLine;
@@ -337,11 +338,8 @@ function blockSave() {
     }
 
     function startNextBlcok() {
-      // selectTypeOfBlock();
-      // if (!canBlockExist()) return gameOver(); 잠시 대기 makeBlock안에 넣을 예정
-
       makeBlock();
-      if (!gameRunning) {
+      if (gameRunning) {
         moveBlockDownPerSecond();
         blockSave();
       }
@@ -349,30 +347,29 @@ function blockSave() {
   }
 }
 
+function getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray) {
+  const blockLineArray = lastSavedBlockNumberArray
+    .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
+    .filter((b) => b < 15);
+
+  return [...new Set(blockLineArray)];
+}
+
 function removefullColorLine() {
-  const blockLine = getBlockLine();
+  // const blockLine = getBlockLine();
+  const blockLine = lastSavedBlockLine;
   let blockLineData = getDataOfBlockLineColor(blockLine);
-  console.log(blockLineData);
   removeBlockLineFullOfColor(blockLineData);
 
-  function getBlockLine() {
-    let result = getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray);
-    console.log(result);
-    return removeDuplicationOfBlockLine(result);
-
-    function removeDuplicationOfBlockLine(blockLineArray) {
-      return [...new Set(blockLineArray)];
-    }
-  }
+  // function getBlockLine() {
+  //   return getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray);
+  // }
 
   function getDataOfBlockLineColor(blockLine) {
     const result = [];
 
     blockLine.map((bl) => {
-      console.log(bl);
       const blockLineNumberArray = getBlockLineNumberArray(bl);
-      console.log(blockLineNumberArray);
-
       const isfull = CheckFullColorLine(blockLineNumberArray);
       if (isfull) {
         shouldBeRemoved = true;
@@ -402,8 +399,8 @@ function removefullColorLine() {
 
   function removeBlockLineFullOfColor(blockLineData) {
     if (shouldBeRemoved) {
+      shouldBeRemoved = false;
       blockLineData.map((block) => {
-        console.log(block);
         if (block.full === "true") {
           removeBlockLine(block.blockLineNumberArray);
           removedBlockLine.push(block.blockLine);
@@ -427,29 +424,18 @@ function getBlockLineNumberArray(blockLine) {
   for (let i = 1; i < 11; i++) {
     result.push(blockLine !== 0 ? blockLine * 10 + i : i);
   }
-  console.log(result);
+
   return result;
 }
-
-function getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray) {
-  console.log(lastSavedBlockNumberArray);
-  return lastSavedBlockNumberArray
-    .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
-    .filter((b) => b < 15);
-}
-// 여기서 버그**********************************************************
 
 function moveAllBlockLineToBottom() {
   const numberOfBlockLineTodown = removedBlockLine.length;
   const boundryToDown = +removedBlockLine[0] - 1;
-  console.log(boundryToDown);
   const boundryToTop = maxHeightBlockLine;
-  console.log(boundryToTop);
   const minRemovedBlockLine = Math.min(...removedBlockLine);
-  console.log(minRemovedBlockLine);
   const numberOfBlockLine = boundryToDown - boundryToTop + 1;
 
-  if (numberOfBlockLineTodown > 0 && isThereDowningBlock) {
+  if (numberOfBlockLineTodown > 0 && isRemainBlockGoDown()) {
     moveRemainBlockDown();
     resetGameData();
   }
@@ -459,7 +445,6 @@ function moveAllBlockLineToBottom() {
       const targetBlockLine = boundryToDown - i;
       const targetBlockLineNumberArray =
         getBlockLineNumberArray(targetBlockLine);
-      console.log(targetBlockLineNumberArray);
 
       getBlockLineColors();
       moveTargetBlockLineToDown();
@@ -472,10 +457,9 @@ function moveAllBlockLineToBottom() {
               document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
             )
             .getPropertyValue("background-color");
-          console.log(blockColor);
+
           blockColorArray.push(blockColor);
         });
-        console.log(blockColorArray);
       }
 
       function moveTargetBlockLineToDown() {
@@ -485,47 +469,20 @@ function moveAllBlockLineToBottom() {
           currentKeyPress = "ArrowDown";
           moveBlock();
           currentBlockArray = currentBlockArray.map((b) => +b + 10);
-          console.log("한줄이동성공");
         }
       }
     }
   }
 
   function resetGameData() {
-    removedBlockLine = [];
     currentBlockType = "squre";
-    maxHeightBlockLine = getMaxHeightBlockLine();
+    maxHeightBlockLine += removedBlockLine.length;
+    removedBlockLine.length = 0;
   }
 
-  function isThereDowningBlock() {
+  function isRemainBlockGoDown() {
     return minRemovedBlockLine > boundryToTop;
   }
-}
-
-function getMaxHeightBlockLine() {
-  // 기존의 maxHeightBlockLine에서
-  // 한줄씩 내려가면서 색깔이 있는 블락을 다음 maxheightBlockline으로 설정
-  let result;
-  let BlockLineForCheck = maxHeightBlockLine + 1;
-  for (let blockLine = BlockLineForCheck; blockLine < 15; blockLine++) {
-    const BlockNumberArrayForCheck = getBlockLineNumberArray(blockLine);
-    const isAllWhite = !BlockNumberArrayForCheck.some((b) => {
-      const blockColor = window
-        .getComputedStyle(
-          document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
-        )
-        .getPropertyValue("background-color");
-      console.log(blockColor);
-      return blockColor !== "rgb(255, 255, 255)";
-    });
-    console.log(isAllWhite);
-    if (isAllWhite === false) {
-      result = blockLine;
-      console.log(result);
-      break;
-    }
-  }
-  return result;
 }
 
 function renderScore() {

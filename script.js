@@ -9,12 +9,13 @@ const modal = document.querySelector(".tetris__gameOverModal");
 const CENTER_POSITION_NUMBER = 5;
 const MAX_HEIGHT_OF_GAME_MAP = 14;
 const DEFAULT_SCORE = 0;
+const SCORE_PER_ONE_LINE_BLOCK = 5;
 
 // 배열로 만들어 놨다가 추후에 random으로 currentBlockShape으로 값 넘겨주기
 const blockShape = ["squre"];
 
 let currentBlockArray;
-// 임시로 squre.. 나중에 랜덤으로 바꾸자
+
 let currentBlockType;
 let currentKeyPress;
 let lastSavedBlockNumberArray;
@@ -22,7 +23,7 @@ let lastSavedBlockLine;
 let maxHeightBlockLine = MAX_HEIGHT_OF_GAME_MAP;
 let removedBlockLine = [];
 let blockColorArray = [];
-let shouldBeRemoved;
+// let shouldBeRemoved;
 let turn = true;
 let isBlockGoingDown;
 let score = DEFAULT_SCORE;
@@ -348,33 +349,47 @@ function blockSave() {
     function removefullColorLine() {
       // const blockLine = getBlockLine();
       const blockLine = lastSavedBlockLine;
-      let blockLineData = getDataOfBlockLineColor(blockLine);
-      removeBlockLineFullOfColor(blockLineData);
+      for (let i = 0; i < blockLine.length; i++) {
+        let blockLineData = getDataOfBlockLineColor(blockLine[i]);
+        blockLineData.removeBlockLineFullOfColor;
+      }
 
-      // function getBlockLine() {
-      //   return getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray);
-      // }
+      // const blockLine = lastSavedBlockLine;
+      // let blockLineData = getDataOfBlockLineColor(blockLine);
+      // removeBlockLineFullOfColor(blockLineData);
 
       function getDataOfBlockLineColor(blockLine) {
-        const result = [];
+        const result = {};
 
-        blockLine.map((bl) => {
-          const blockLineNumberArray = getBlockLineNumberArray(bl);
-          const isfull = CheckFullColorLine(blockLineNumberArray);
-          if (isfull) {
-            shouldBeRemoved = true;
-          }
-          result.push({
-            blockLine: `${bl}`,
-            full: `${isfull}`,
-            blockLineNumberArray,
-          });
-        });
+        result.blockLine = blockLine;
+        result.blockLineNumberArray = getBlockLineNumberArray(result.blockLine);
+        result.isWhiteBlock = isWhiteBlock;
+        result.isfull = CheckFullColorLine(result);
+        result.removeBlockLine = removeBlockLine;
+        result.addScore = addScore();
+        result.removeBlockLineFullOfColor = removeBlockLineFullOfColor(result);
+
+        // const result = [];
+        // blockLine.map((bl) => {
+
+        //   const blockLineNumberArray = getBlockLineNumberArray(bl);
+        //   const isfull = CheckFullColorLine(blockLineNumberArray);
+        //   if (isfull) {
+        //     shouldBeRemoved = true;
+        //   }
+        //   result.push({
+        //     blockLine: `${bl}`,
+        //     full: `${isfull}`,
+        //     blockLineNumberArray,
+        //   });
+        // });
         return result;
       }
 
-      function CheckFullColorLine(NumberArray) {
-        return !NumberArray.some((b) => isWhiteBlock(b));
+      function CheckFullColorLine(blockLineData) {
+        return !blockLineData.blockLineNumberArray.some((blockNumber) =>
+          blockLineData.isWhiteBlock(blockNumber)
+        );
       }
 
       function isWhiteBlock(blockNumber) {
@@ -390,16 +405,23 @@ function blockSave() {
       }
 
       function removeBlockLineFullOfColor(blockLineData) {
-        if (shouldBeRemoved) {
-          shouldBeRemoved = false;
-          blockLineData.map((block) => {
-            if (block.full === "true") {
-              removeBlockLine(block.blockLineNumberArray);
-              removedBlockLine.push(block.blockLine);
-              score += 5;
-            }
-          });
+        if (blockLineData.isfull) {
+          blockLineData.removeBlockLine(blockLineData.blockLineNumberArray);
+          removedBlockLine.push(blockLineData.blockLine);
+          blockLineData.addScore;
         }
+        // });
+        // }
+        // if (shouldBeRemoved) {
+        //   shouldBeRemoved = false;
+        //   blockLineData.map((block) => {
+        //     if (block.full === "true") {
+        //       removeBlockLine(block.blockLineNumberArray);
+        //       removedBlockLine.push(block.blockLine);
+        //       addScore();
+        //     }
+        //   });
+        // }
       }
 
       function removeBlockLine(numberArray) {
@@ -408,6 +430,10 @@ function blockSave() {
             `.tetris__gridItem[data-id="${b}"]`
           ).style.backgroundColor = "white";
         });
+      }
+
+      function addScore() {
+        score += SCORE_PER_ONE_LINE_BLOCK;
       }
     }
 
@@ -421,31 +447,31 @@ function blockSave() {
     }
 
     function moveAllBlockLineToBottom() {
-      const initialData = makeDataAboutMoveBlock();
-      const enrichedData = makeEnrichedData(initialData);
+      const inGameData = makeDataAboutMoveBlockLine();
+      // const enrichedData = makeEnrichedData(initialData);
 
-      if (enrichedData.isBlockLineRemoved && enrichedData.isRemainBlockGoDown) {
-        enrichedData.moveRemainBlockDown;
-        enrichedData.resetGameData;
+      if (inGameData.isBlockLineRemoved && inGameData.isRemainBlockGoDown) {
+        inGameData.moveRemainBlockDown;
+        inGameData.resetGameData;
       }
 
-      function makeDataAboutMoveBlock() {
-        result = {};
-        result.numberOfBlockLineTodown = removedBlockLine.length;
+      function makeDataAboutMoveBlockLine() {
+        const result = {};
+        result.removedBlockLine = removedBlockLine;
+        result.numberOfBlockLineTodown = result.removedBlockLine.length;
         result.boundryToDown = +removedBlockLine[0] - 1;
         result.boundryToTop = maxHeightBlockLine;
         result.minRemovedBlockLine = Math.min(...removedBlockLine);
         result.numberOfBlockLine =
           result.boundryToDown - result.boundryToTop + 1;
 
-        return result;
-      }
+        result.isRemainBlockGoDown = isRemainBlockGoDown(result);
+        result.isBlockLineRemoved = isBlockLineRemoved(result);
+        result.getBlockLineColors = getBlockLineColors;
+        result.getBlockLineNumberArray = getBlockLineNumberArray;
+        result.moveTargetBlockLineToDown = moveTargetBlockLineToDown;
 
-      function makeEnrichedData(data) {
-        result = {};
-        result.isRemainBlockGoDown = isRemainBlockGoDown(data);
-        result.isBlockLineRemoved = isBlockLineRemoved(data);
-        result.moveRemainBlockDown = moveRemainBlockDown(data);
+        result.moveRemainBlockDown = moveRemainBlockDown(result);
         result.resetGameData = resetGameData();
 
         return result;
@@ -459,37 +485,69 @@ function blockSave() {
         return data.numberOfBlockLineTodown > 0;
       }
 
+      function getBlockLineColors(targetBlockLineNumberArray) {
+        blockColorArray = [];
+
+        targetBlockLineNumberArray.map((b) => {
+          const blockColor = window
+            .getComputedStyle(
+              document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
+            )
+            .getPropertyValue("background-color");
+
+          blockColorArray.push(blockColor);
+        });
+      }
+
+      function moveTargetBlockLineToDown(data, targetBlockLineNumberArray) {
+        currentBlockArray = targetBlockLineNumberArray;
+        currentBlockType = "blockLine";
+        for (let i = 0; i < data.removedBlockLine.length; i++) {
+          currentKeyPress = "ArrowDown";
+          moveBlock();
+          currentBlockArray = currentBlockArray.map((b) => +b + 10);
+        }
+      }
+
       function moveRemainBlockDown(data) {
         for (let i = 0; i < data.numberOfBlockLine; i++) {
           const targetBlockLine = data.boundryToDown - i;
           const targetBlockLineNumberArray =
-            getBlockLineNumberArray(targetBlockLine);
+            data.getBlockLineNumberArray(targetBlockLine);
 
-          getBlockLineColors();
-          moveTargetBlockLineToDown();
+          data.getBlockLineColors(targetBlockLineNumberArray);
+          data.moveTargetBlockLineToDown(data, targetBlockLineNumberArray);
 
-          function getBlockLineColors() {
-            blockColorArray = [];
-            targetBlockLineNumberArray.map((b) => {
-              const blockColor = window
-                .getComputedStyle(
-                  document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
-                )
-                .getPropertyValue("background-color");
+          // for (let i = 0; i < data.numberOfBlockLine; i++) {
+          //   const targetBlockLine = data.boundryToDown - i;
+          //   const targetBlockLineNumberArray =
+          //     getBlockLineNumberArray(targetBlockLine);
 
-              blockColorArray.push(blockColor);
-            });
-          }
+          //   getBlockLineColors();
+          //   moveTargetBlockLineToDown();
 
-          function moveTargetBlockLineToDown() {
-            currentBlockArray = targetBlockLineNumberArray;
-            currentBlockType = "blockLine";
-            for (let i = 0; i < removedBlockLine.length; i++) {
-              currentKeyPress = "ArrowDown";
-              moveBlock();
-              currentBlockArray = currentBlockArray.map((b) => +b + 10);
-            }
-          }
+          // function getBlockLineColors() {
+          //   blockColorArray = [];
+          //   targetBlockLineNumberArray.map((b) => {
+          //     const blockColor = window
+          //       .getComputedStyle(
+          //         document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
+          //       )
+          //       .getPropertyValue("background-color");
+
+          //     blockColorArray.push(blockColor);
+          //   });
+          // }
+
+          // function moveTargetBlockLineToDown(data, targetBlockLineNumberArray) {
+          //   currentBlockArray = targetBlockLineNumberArray;
+          //   currentBlockType = "blockLine";
+          //   for (let i = 0; i < data.removedBlockLine.length; i++) {
+          //     currentKeyPress = "ArrowDown";
+          //     moveBlock();
+          //     currentBlockArray = currentBlockArray.map((b) => +b + 10);
+          //   }
+          // }
         }
       }
 

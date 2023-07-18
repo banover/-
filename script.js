@@ -309,6 +309,8 @@ function moveBlockDownPerSecond() {
 }
 
 function blockSave() {
+  // const setIntervalCheckBlockIsStop = setInterval(checkBlockIsStop, 500); checkBlockIsStop.bind(null, data) 이런식으로 data 넣을 수 있음
+  // data와 로직을 분리하자!
   const setIntervalCheckBlockIsStop = setInterval(checkBlockIsStop, 500);
 
   function checkBlockIsStop() {
@@ -316,25 +318,45 @@ function blockSave() {
     if (!isBlockGoingDown) {
       clearInterval(setIntervalCheckBlockIsStop);
       // turn = true;
-      setDataAboutLastSavedBlock();
-      removefullColorLine();
-      moveAllBlockLineToBottom();
+      const blockSaveData = setDataAboutLastSavedBlock();
+      removefullColorLine(blockSaveData);
+      moveAllBlockLineToBottom(blockSaveData);
       renderScore();
       startNextBlcok();
       // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
     }
 
     function setDataAboutLastSavedBlock() {
-      lastSavedBlockNumberArray = currentBlockArray;
-      // 가장 높은 높이의 blockLine을 찾기 추후 block 모두 내리기에 사용****************************************
-      const lastSavedBlockLines = getBlockLinesOfLastSavedBlock(
-        lastSavedBlockNumberArray
+      result = {};
+
+      result.lastSavedBlockNumberArray = getLastSavedBlockNumberArray();
+      result.lastSavedBlockLines = getBlockLinesOfLastSavedBlock(
+        result.lastSavedBlockNumberArray
+      );
+      result.smallestBlockLine = Math.min(...result.lastSavedBlockLines);
+      result.maxHeightBlockLine = getMaxHeightBlockLine(
+        result.smallestBlockLine
       );
 
-      lastSavedBlockLine = lastSavedBlockLines;
-      const smallestBlockLine = Math.min(...lastSavedBlockLines);
-      if (smallestBlockLine < maxHeightBlockLine) {
-        maxHeightBlockLine = smallestBlockLine;
+      return result;
+
+      // **************************************************************************************************
+
+      // lastSavedBlockNumberArray = getLastSavedBlockNumberArray();
+      // const lastSavedBlockLines = getBlockLinesOfLastSavedBlock(
+      //   lastSavedBlockNumberArray
+      // );
+
+      // lastSavedBlockLine = lastSavedBlockLines;
+      // const smallestBlockLine = Math.min(...lastSavedBlockLines);
+      // maxHeightBlockLine = getMaxHeightBlockLine(smallestBlockLine);
+      // // if (smallestBlockLine < maxHeightBlockLine) {
+      // //   maxHeightBlockLine = smallestBlockLine;
+      // // }
+
+      function getLastSavedBlockNumberArray() {
+        lastSavedBlockNumberArray = currentBlockArray;
+        return lastSavedBlockNumberArray;
       }
 
       function getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray) {
@@ -344,19 +366,22 @@ function blockSave() {
 
         return [...new Set(blockLineArray)];
       }
+
+      function getMaxHeightBlockLine(smallestBlockLine) {
+        if (smallestBlockLine < maxHeightBlockLine) {
+          maxHeightBlockLine = smallestBlockLine;
+        }
+        return maxHeightBlockLine;
+      }
     }
 
-    function removefullColorLine() {
-      // const blockLine = getBlockLine();
-      const blockLine = lastSavedBlockLine;
-      for (let i = 0; i < blockLine.length; i++) {
-        let blockLineData = getDataOfBlockLineColor(blockLine[i]);
+    function removefullColorLine(data) {
+      for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
+        let blockLineData = getDataOfBlockLineColor(
+          data.lastSavedBlockLines[i]
+        );
         blockLineData.removeBlockLineFullOfColor;
       }
-
-      // const blockLine = lastSavedBlockLine;
-      // let blockLineData = getDataOfBlockLineColor(blockLine);
-      // removeBlockLineFullOfColor(blockLineData);
 
       function getDataOfBlockLineColor(blockLine) {
         const result = {};
@@ -366,7 +391,7 @@ function blockSave() {
         result.isWhiteBlock = isWhiteBlock;
         result.isfull = CheckFullColorLine(result);
         result.removeBlockLine = removeBlockLine;
-        result.addScore = addScore();
+        result.addScore = addScore;
         result.removeBlockLineFullOfColor = removeBlockLineFullOfColor(result);
 
         // const result = [];
@@ -408,7 +433,7 @@ function blockSave() {
         if (blockLineData.isfull) {
           blockLineData.removeBlockLine(blockLineData.blockLineNumberArray);
           removedBlockLine.push(blockLineData.blockLine);
-          blockLineData.addScore;
+          blockLineData.addScore();
         }
         // });
         // }
@@ -446,7 +471,7 @@ function blockSave() {
       return result;
     }
 
-    function moveAllBlockLineToBottom() {
+    function moveAllBlockLineToBottom(data) {
       const inGameData = makeDataAboutMoveBlockLine();
       // const enrichedData = makeEnrichedData(initialData);
 
@@ -460,7 +485,7 @@ function blockSave() {
         result.removedBlockLine = removedBlockLine;
         result.numberOfBlockLineTodown = result.removedBlockLine.length;
         result.boundryToDown = +removedBlockLine[0] - 1;
-        result.boundryToTop = maxHeightBlockLine;
+        result.boundryToTop = data.maxHeightBlockLine;
         result.minRemovedBlockLine = Math.min(...removedBlockLine);
         result.numberOfBlockLine =
           result.boundryToDown - result.boundryToTop + 1;
@@ -472,7 +497,7 @@ function blockSave() {
         result.moveTargetBlockLineToDown = moveTargetBlockLineToDown;
 
         result.moveRemainBlockDown = moveRemainBlockDown(result);
-        result.resetGameData = resetGameData();
+        result.resetGameData = resetGameData(data.maxHeightBlockLine);
 
         return result;
       }
@@ -551,7 +576,7 @@ function blockSave() {
         }
       }
 
-      function resetGameData() {
+      function resetGameData(maxHeightBlockLine) {
         currentBlockType = "squre";
         maxHeightBlockLine += removedBlockLine.length;
         removedBlockLine.length = 0;

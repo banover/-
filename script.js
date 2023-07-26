@@ -1,3 +1,5 @@
+"use strict";
+
 const menu = document.querySelector(".tetris__menu");
 const playingBtn = document.querySelector(".tetris__playingBtn");
 const checkBtn = document.querySelector(".tetris__checkBtn");
@@ -73,35 +75,24 @@ function gameStart() {
 }
 
 function makeBlock(blockNumberArray) {
-  if (isBlockTypeBlockLine()) return makeBlockLine(blockNumberArray);
-  selectTypeOfBlock(blockNumberArray);
-  makeBlockTypeShape(blockNumberArray);
-  if (!canBlockExist()) return gameOver();
-  paintBlock("red");
+  const DataAboutMakeBlock = getDataAboutMakeBlock(blockNumberArray);
+  createBlockDetail(DataAboutMakeBlock);
+
+  function getDataAboutMakeBlock(blockNumberArray) {
+    const result = {};
+    result.blockNumberArray = blockNumberArray;
+    result.currentBlockType = currentBlockType;
+    result.isBlockTypeBlockLine = isBlockTypeBlockLine(result.currentBlockType);
+    result.getRandomBlockType = getRandomBlockType();
+    result.currentBlockArray = currentBlockArray;
+    result.isThereEmptySpace = isThereEmptySpace;
+    result.canBlockExist = canBlockExist;
+
+    return result;
+  }
 
   function isBlockTypeBlockLine() {
     return currentBlockType === "blockLine";
-  }
-
-  function makeBlockLine(blockNumberArray) {
-    // paintBlockLine("red");
-    paintBlockLine();
-
-    function paintBlockLine() {
-      blockNumberArray.map((item, index) => {
-        const miniBlock = document.querySelector(
-          `.tetris__gridItem[data-id="${item}"]`
-        );
-        miniBlock.style.backgroundColor = blockColorArray[index];
-      });
-      // blockColorArray = [];
-    }
-  }
-
-  function selectTypeOfBlock(blockNumberArray) {
-    currentBlockType = blockNumberArray
-      ? currentBlockType
-      : getRandomBlockType();
   }
 
   function getRandomBlockType() {
@@ -110,72 +101,89 @@ function makeBlock(blockNumberArray) {
     const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
     return blockType[blockTypeNumber];
   }
-}
 
-function makeBlockTypeShape(blockNumberArray) {
-  if (currentBlockType === "squre") return makeSqureShape(blockNumberArray);
-  // blockType마다 함수 실행시키기
-}
+  function isThereEmptySpace(currentBlockArray) {
+    return !currentBlockArray.some((b) => {
+      const blockColor = window
+        .getComputedStyle(
+          document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
+        )
+        .getPropertyValue("background-color");
 
-function makeSqureShape(blockNumberArray) {
-  const blockNumber = blockNumberArray
-    ? blockNumberArray
-    : [
-        `${CENTER_POSITION_NUMBER}`,
-        `${CENTER_POSITION_NUMBER + 1}`,
-        `${CENTER_POSITION_NUMBER + 10}`,
-        `${CENTER_POSITION_NUMBER + 11}`,
-      ];
-  console.log(blockNumber);
-  currentBlockType = "squre";
-  currentBlockArray = blockNumber;
-}
+      return blockColor !== "rgb(255, 255, 255)";
+    });
+  }
 
-function canBlockExist() {
-  return isThereEmptySpace();
-}
+  function canBlockExist(data) {
+    console.log(data);
+    return data.isThereEmptySpace(data.currentBlockArray);
+  }
 
-function isThereEmptySpace() {
-  return !currentBlockArray.some((b) => {
-    const blockColor = window
-      .getComputedStyle(
-        document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
-      )
-      .getPropertyValue("background-color");
-
-    return blockColor !== "rgb(255, 255, 255)";
-  });
-}
-
-function gameOver() {
-  modal.style.display = "block";
-  gameRunning = false;
-}
-
-function paintBlock(color) {
-  currentBlockArray.map((item) => {
-    const miniBlock = document.querySelector(
-      `.tetris__gridItem[data-id="${item}"]`
-    );
-    miniBlock.style.backgroundColor = `${color}`;
-  });
-}
-
-function keyPressHandler() {
-  window.addEventListener("keydown", (e) => {
-    if (isArrowKeyPressed(e.key)) moveBlock();
-
-    function isArrowKeyPressed(key) {
-      currentKeyPress = key;
-
-      return (
-        currentKeyPress === "ArrowRight" ||
-        currentKeyPress === "ArrowLeft" ||
-        currentKeyPress === "ArrowUp" ||
-        currentKeyPress === "ArrowDown"
-      );
+  function createBlockDetail(data) {
+    if (data.isBlockTypeBlockLine) {
+      return paintBlockLine(data.blockNumberArray);
     }
-  });
+    selectTypeOfBlock(data);
+    makeBlockTypeShape(data);
+    if (!data.canBlockExist(data)) return gameOver();
+    paintBlock("red");
+  }
+
+  function paintBlockLine(blockNumberArray) {
+    blockNumberArray.map((item, index) => {
+      const miniBlock = document.querySelector(
+        `.tetris__gridItem[data-id="${item}"]`
+      );
+      miniBlock.style.backgroundColor = blockColorArray[index];
+    });
+    // blockColorArray = [];
+  }
+  // }
+
+  function selectTypeOfBlock(data) {
+    currentBlockType = data.blockNumberArray
+      ? data.currentBlockType
+      : data.getRandomBlockType;
+
+    data.currentBlockType = data.blockNumberArray
+      ? data.currentBlockType
+      : data.getRandomBlockType;
+  }
+
+  function makeBlockTypeShape(data) {
+    if (data.currentBlockType === "squre") return makeSqureShape(data);
+    // blockType마다 함수 실행시키기
+  }
+
+  function makeSqureShape(data) {
+    const blockNumber = data.blockNumberArray
+      ? data.blockNumberArray
+      : [
+          `${CENTER_POSITION_NUMBER}`,
+          `${CENTER_POSITION_NUMBER + 1}`,
+          `${CENTER_POSITION_NUMBER + 10}`,
+          `${CENTER_POSITION_NUMBER + 11}`,
+        ];
+    console.log(blockNumber);
+    currentBlockType = "squre";
+    currentBlockArray = blockNumber;
+    data.currentBlockType = "squre";
+    data.currentBlockArray = blockNumber;
+  }
+
+  function gameOver() {
+    modal.style.display = "block";
+    gameRunning = false;
+  }
+
+  function paintBlock(color) {
+    currentBlockArray.map((item) => {
+      const miniBlock = document.querySelector(
+        `.tetris__gridItem[data-id="${item}"]`
+      );
+      miniBlock.style.backgroundColor = `${color}`;
+    });
+  }
 }
 
 function moveBlock() {
@@ -213,83 +221,101 @@ function makeNewBlockNumberArray() {
 }
 
 function canBlockMove() {
-  if (canFutureBlockExist()) return true;
+  const dataAboutMove = getDataAboutMove();
+  if (canFutureBlockExist(dataAboutMove)) return true;
   // if (currentBlockType === "squre" && canFutureBlockMove()) return true;
   // if (currentBlockType === "blockLine" && canFutureBlockMove()) return true;
   return false;
 
-  function canFutureBlockExist() {
-    const futureBlockArray = makeFutureBlockArray();
+  function getDataAboutMove() {
+    const result = {};
+    result.futureBlockArray = makeFutureBlockArray();
+    console.log(result.futureBlockArray);
+    result.isBlockOverRightGameMap = isBlockOverRightGameMap(
+      result.futureBlockArray
+    );
+    result.isBlockOverLeftGameMap = isBlockOverLeftGameMap(
+      result.futureBlockArray
+    );
+    result.isBlockOverBottomGameMap = isBlockOverBottomGameMap(
+      result.futureBlockArray
+    );
+    result.isFutureBlockOverGameMap = isFutureBlockOverGameMap(result);
+    console.log(result.isFutureBlockOverGameMap);
+    result.isAlreadyBlockThere = isAlreadyBlockThere;
+    result.canfutureBlockPainted = canfutureBlockPainted;
+    return result;
+  }
 
-    if (
-      currentBlockType !== "blockLine" &&
-      isFutureBlockOverGameMap(futureBlockArray)
-    ) {
-      return false;
+  function makeFutureBlockArray() {
+    if (currentKeyPress === "ArrowLeft") {
+      return currentBlockArray
+        .map((b) => +b - 1)
+        .filter((b) => !currentBlockArray.includes(`${b}`));
     }
-    return canfutureBlockPainted(futureBlockArray);
 
-    function canfutureBlockPainted(futureBlockArray) {
-      return !futureBlockArray.some((b) => isAlreadyBlockThere(b));
+    if (currentKeyPress === "ArrowRight") {
+      return currentBlockArray
+        .map((b) => +b + 1)
+        .filter((b) => !currentBlockArray.includes(`${b}`));
     }
 
-    function isAlreadyBlockThere(futureBlock) {
-      const futureBlockColor = window
-        .getComputedStyle(
-          document.querySelector(`.tetris__gridItem[data-id="${futureBlock}"]`)
-        )
-        .getPropertyValue("background-color");
-
-      return futureBlockColor !== "rgb(255, 255, 255)";
+    if (currentKeyPress === "ArrowDown") {
+      return currentBlockArray
+        .map((b) => +b + 10)
+        .filter((b) => !currentBlockArray.includes(`${b}`));
     }
-  }
-}
 
-function makeFutureBlockArray() {
-  if (currentKeyPress === "ArrowLeft") {
-    return currentBlockArray
-      .map((b) => +b - 1)
-      .filter((b) => !currentBlockArray.includes(`${b}`));
+    if (currentKeyPress === "ArrowUp") return currentBlockArray;
   }
 
-  if (currentKeyPress === "ArrowRight") {
-    return currentBlockArray
-      .map((b) => +b + 1)
-      .filter((b) => !currentBlockArray.includes(`${b}`));
-  }
-
-  if (currentKeyPress === "ArrowDown") {
-    return currentBlockArray
-      .map((b) => +b + 10)
-      .filter((b) => !currentBlockArray.includes(`${b}`));
-  }
-
-  if (currentKeyPress === "ArrowUp") return currentBlockArray;
-}
-
-function isFutureBlockOverGameMap(futureBlockArray) {
-  return isBlockOverRightGameMap() ||
-    isBlockOverLeftGameMap() ||
-    isBlockOverBottomGameMap()
-    ? true
-    : false;
-
-  function isBlockOverRightGameMap() {
+  function isBlockOverRightGameMap(futureBlockArray) {
     return (
       currentBlockArray.some((b) => b % 10 === 0) &&
       futureBlockArray.some((b) => b % 10 === 1)
     );
   }
 
-  function isBlockOverLeftGameMap() {
+  function isBlockOverLeftGameMap(futureBlockArray) {
     return (
       currentBlockArray.some((b) => b % 10 === 1) &&
       futureBlockArray.some((b) => b % 10 === 0)
     );
   }
 
-  function isBlockOverBottomGameMap() {
+  function isBlockOverBottomGameMap(futureBlockArray) {
     return futureBlockArray.some((b) => +b > 150);
+  }
+
+  function isFutureBlockOverGameMap(data) {
+    return data.isBlockOverRightGameMap ||
+      data.isBlockOverLeftGameMap ||
+      data.isBlockOverBottomGameMap
+      ? true
+      : false;
+  }
+
+  function isAlreadyBlockThere(futureBlock) {
+    console.log(2);
+    const futureBlockColor = window
+      .getComputedStyle(
+        document.querySelector(`.tetris__gridItem[data-id="${futureBlock}"]`)
+      )
+      .getPropertyValue("background-color");
+
+    return futureBlockColor !== "rgb(255, 255, 255)";
+  }
+
+  function canfutureBlockPainted(data) {
+    return !data.futureBlockArray.some((b) => data.isAlreadyBlockThere(b));
+  }
+
+  function canFutureBlockExist(data) {
+    if (currentBlockType !== "blockLine" && data.isFutureBlockOverGameMap) {
+      return false;
+    }
+
+    return data.canfutureBlockPainted(data);
   }
 }
 
@@ -307,6 +333,23 @@ function moveBlockDownPerSecond() {
     isBlockGoingDown = false;
     // turn = false;
   }
+}
+
+function keyPressHandler() {
+  window.addEventListener("keydown", (e) => {
+    if (isArrowKeyPressed(e.key)) moveBlock();
+
+    function isArrowKeyPressed(key) {
+      currentKeyPress = key;
+
+      return (
+        currentKeyPress === "ArrowRight" ||
+        currentKeyPress === "ArrowLeft" ||
+        currentKeyPress === "ArrowUp" ||
+        currentKeyPress === "ArrowDown"
+      );
+    }
+  });
 }
 
 function blockSave() {
@@ -328,16 +371,12 @@ function blockSave() {
     }
 
     function setDataAboutLastSavedBlock() {
-      result = {};
+      const result = {};
 
       result.lastSavedBlockNumberArray = getLastSavedBlockNumberArray();
-      result.lastSavedBlockLines = getBlockLinesOfLastSavedBlock(
-        result.lastSavedBlockNumberArray
-      );
+      result.lastSavedBlockLines = getBlockLinesOfLastSavedBlock();
       result.smallestBlockLine = Math.min(...result.lastSavedBlockLines);
-      result.maxHeightBlockLine = getMaxHeightBlockLine(
-        result.smallestBlockLine
-      );
+      result.maxHeightBlockLine = getMaxHeightBlockLine();
 
       return result;
 
@@ -346,17 +385,18 @@ function blockSave() {
         return lastSavedBlockNumberArray;
       }
 
-      function getBlockLinesOfLastSavedBlock(lastSavedBlockNumberArray) {
-        const blockLineArray = lastSavedBlockNumberArray
+      function getBlockLinesOfLastSavedBlock() {
+        const blockLineArray = result.lastSavedBlockNumberArray
           .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
           .filter((b) => b < 15);
 
         return [...new Set(blockLineArray)];
+        // 개선하자면 굳이 lastSavedBlockNumberArray를 다 map하기보다는 부분만 사용하겠금...
       }
 
-      function getMaxHeightBlockLine(smallestBlockLine) {
-        if (smallestBlockLine < maxHeightBlockLine) {
-          maxHeightBlockLine = smallestBlockLine;
+      function getMaxHeightBlockLine() {
+        if (result.smallestBlockLine < maxHeightBlockLine) {
+          maxHeightBlockLine = result.smallestBlockLine;
         }
         return maxHeightBlockLine;
       }
@@ -364,9 +404,10 @@ function blockSave() {
 
     function removefullColorLine(data) {
       const blockLineData = getBlockLineData(data);
-      removeBlockLineFullOfColor(data, blockLineData);
+      removeBlockLineFullOfColor(blockLineData);
+      saveRemovedBlockLine(blockLineData);
 
-      function getBlockLineData(data) {
+      function getBlockLineData() {
         const result = [];
         for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
           result.push(getDataOfBlockLineColor(data.lastSavedBlockLines[i]));
@@ -380,10 +421,7 @@ function blockSave() {
         result.blockLine = blockLine;
         result.blockLineNumberArray = getBlockLineNumberArray(result.blockLine);
         result.isWhiteBlock = isWhiteBlock;
-        result.isfull = CheckFullColorLine(result);
-        result.removeBlockLine = removeBlockLine;
-        // removeBlockLine은 data에서 빼고 호출되는 장소에 중첩함수로 놔두자..
-        // data와 로직을 분리하는 것임을 명심하자!
+        result.isfull = CheckFullColorLine();
 
         return result;
 
@@ -399,10 +437,18 @@ function blockSave() {
           return BlockColor === "rgb(255, 255, 255)";
         }
 
-        function CheckFullColorLine(blockLineData) {
-          return !blockLineData.blockLineNumberArray.some((blockNumber) =>
-            blockLineData.isWhiteBlock(blockNumber)
+        function CheckFullColorLine() {
+          return !result.blockLineNumberArray.some((blockNumber) =>
+            result.isWhiteBlock(blockNumber)
           );
+        }
+      }
+
+      function removeBlockLineFullOfColor(blockLineData) {
+        for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
+          if (blockLineData[i].isfull) {
+            removeBlockLine(blockLineData[i].blockLineNumberArray);
+          }
         }
 
         function removeBlockLine(numberArray) {
@@ -414,15 +460,13 @@ function blockSave() {
         }
       }
 
-      function removeBlockLineFullOfColor(data, blockLineData) {
+      function saveRemovedBlockLine(blockLineData) {
         for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
           if (blockLineData[i].isfull) {
-            blockLineData[i].removeBlockLine(
-              blockLineData[i].blockLineNumberArray
-            );
             removedBlockLine.push(blockLineData[i].blockLine);
           }
         }
+        console.log(removedBlockLine);
       }
     }
 
@@ -437,6 +481,7 @@ function blockSave() {
 
     function moveAllBlockLineToBottom(data) {
       const inGameData = makeDataAboutMoveBlockLine();
+      console.log(inGameData);
       moveRemainBlockDown(inGameData);
 
       function makeDataAboutMoveBlockLine() {
@@ -456,12 +501,12 @@ function blockSave() {
 
         return result;
 
-        function isRemainBlockGoDown(data) {
-          return data.minRemovedBlockLine > data.boundryToTop;
+        function isRemainBlockGoDown() {
+          return result.minRemovedBlockLine > result.boundryToTop;
         }
 
         function isBlockLineRemoved(data) {
-          return data.numberOfBlockLineTodown > 0;
+          return result.numberOfBlockLineTodown > 0;
         }
 
         function getBlockLineColors(targetBlockLineNumberArray) {
@@ -481,13 +526,13 @@ function blockSave() {
         }
       }
 
-      function moveRemainBlockDown(data) {
-        const enrichedData = getEnrichedData(data);
+      function moveRemainBlockDown(inGameData) {
+        const enrichedData = getEnrichedData(inGameData);
         moveTargetBlockLineToDown(enrichedData);
 
-        function getEnrichedData(data) {
-          if (data.isBlockLineRemoved && data.isRemainBlockGoDown) {
-            let result = { ...data };
+        function getEnrichedData(inGameData) {
+          if (inGameData.isBlockLineRemoved && inGameData.isRemainBlockGoDown) {
+            let result = { ...inGameData };
             result.targetBlockLineNumberArray = [];
 
             for (let i = 0; i < result.numberOfBlockLine; i++) {
@@ -503,15 +548,15 @@ function blockSave() {
           }
         }
 
-        function moveTargetBlockLineToDown(data) {
-          if (data?.targetBlockLineNumberArray?.length) {
-            for (let i = 0; i < data.numberOfBlockLine; i++) {
-              currentBlockArray = data.targetBlockLineNumberArray[i];
+        function moveTargetBlockLineToDown(enrichedData) {
+          if (enrichedData?.targetBlockLineNumberArray?.length) {
+            for (let i = 0; i < enrichedData.numberOfBlockLine; i++) {
+              currentBlockArray = enrichedData.targetBlockLineNumberArray[i];
               currentBlockType = "blockLine";
-              blockColorArray = data.getBlockLineColors(
-                data.targetBlockLineNumberArray[i]
+              blockColorArray = enrichedData.getBlockLineColors(
+                enrichedData.targetBlockLineNumberArray[i]
               );
-              for (let j = 0; j < data.removedBlockLine.length; j++) {
+              for (let j = 0; j < enrichedData.removedBlockLine.length; j++) {
                 currentKeyPress = "ArrowDown";
                 moveBlock();
                 currentBlockArray = currentBlockArray.map((b) => +b + 10);
@@ -537,11 +582,10 @@ function blockSave() {
     }
 
     function startNextBlcok(data) {
-      console.log(removedBlockLine.length);
       if (removedBlockLine.length) {
         resetGameData(data);
       }
-      console.log(removedBlockLine.length);
+
       makeBlock();
       if (gameRunning) {
         moveBlockDownPerSecond();

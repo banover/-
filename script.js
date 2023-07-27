@@ -76,34 +76,81 @@ function gameStart() {
 
 function makeBlock(blockNumberArray) {
   const DataAboutMakeBlock = getDataAboutMakeBlock(blockNumberArray);
-  createBlockDetail(DataAboutMakeBlock);
+  paintBlocks(DataAboutMakeBlock);
 
   function getDataAboutMakeBlock(blockNumberArray) {
     const result = {};
-    result.blockNumberArray = blockNumberArray;
-    result.currentBlockType = currentBlockType;
+
+    result.isFirstBlock =
+      maxHeightBlockLine === MAX_HEIGHT_OF_GAME_MAP ? true : false;
+
+    result.currentBlockType = currentBlockType
+      ? currentBlockType
+      : getRandomBlockType();
+
+    result.currentBlockNumberArray = blockNumberArray
+      ? setBlockNumberArray(blockNumberArray)
+      : makeBlockNumberArray(result);
+
+    console.log(result.currentBlockNumberArray);
+
     result.isBlockTypeBlockLine = isBlockTypeBlockLine(result.currentBlockType);
-    result.getRandomBlockType = getRandomBlockType();
-    result.currentBlockArray = currentBlockArray;
-    result.isThereEmptySpace = isThereEmptySpace;
-    result.canBlockExist = canBlockExist;
+
+    // result.selectTypeOfBlock = selectTypeOfBlock(result);
+    result.isThereEmptySpace = result.isFirstBlock
+      ? true
+      : isThereEmptySpace(result.currentBlockNumberArray);
+
+    result.canBlockExist = canBlockExist(result);
 
     return result;
-  }
-
-  function isBlockTypeBlockLine() {
-    return currentBlockType === "blockLine";
   }
 
   function getRandomBlockType() {
     const blockType = ["squre"];
     const randomNumber = Math.floor(Math.random() * blockType.length);
     const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
+    currentBlockType = blockType[blockTypeNumber];
     return blockType[blockTypeNumber];
   }
 
-  function isThereEmptySpace(currentBlockArray) {
-    return !currentBlockArray.some((b) => {
+  function isBlockTypeBlockLine() {
+    return currentBlockType === "blockLine";
+  }
+
+  // function selectTypeOfBlock(data) {
+  //   currentBlockType = data.currentBlockNumberArray
+  //     ? data.currentBlockType
+  //     : data.getRandomBlockType;
+  // }
+
+  function setBlockNumberArray(blockNumberArray) {
+    currentBlockArray = blockNumberArray;
+    return blockNumberArray;
+  }
+
+  function makeBlockNumberArray(data) {
+    if (data.currentBlockType === "squre") return makeSqureNumberArray(data);
+    // blockType마다 함수 실행시키기
+  }
+
+  function makeSqureNumberArray(data) {
+    const blockNumber = data.currentBlockNumberArray
+      ? data.currentBlockNumberArray
+      : [
+          `${CENTER_POSITION_NUMBER}`,
+          `${CENTER_POSITION_NUMBER + 1}`,
+          `${CENTER_POSITION_NUMBER + 10}`,
+          `${CENTER_POSITION_NUMBER + 11}`,
+        ];
+
+    currentBlockArray = blockNumber;
+
+    return blockNumber;
+  }
+
+  function isThereEmptySpace(blockNumberArray) {
+    return !blockNumberArray.some((b) => {
       const blockColor = window
         .getComputedStyle(
           document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
@@ -115,18 +162,16 @@ function makeBlock(blockNumberArray) {
   }
 
   function canBlockExist(data) {
-    console.log(data);
-    return data.isThereEmptySpace(data.currentBlockArray);
+    return data.isThereEmptySpace;
   }
 
-  function createBlockDetail(data) {
+  function paintBlocks(data) {
     if (data.isBlockTypeBlockLine) {
-      return paintBlockLine(data.blockNumberArray);
+      return paintBlockLine(data.currentBlockNumberArray);
     }
-    selectTypeOfBlock(data);
-    makeBlockTypeShape(data);
-    if (!data.canBlockExist(data)) return gameOver();
-    paintBlock("red");
+
+    if (!data.canBlockExist) return gameOver();
+    paintBlock(data, "red");
   }
 
   function paintBlockLine(blockNumberArray) {
@@ -140,44 +185,13 @@ function makeBlock(blockNumberArray) {
   }
   // }
 
-  function selectTypeOfBlock(data) {
-    currentBlockType = data.blockNumberArray
-      ? data.currentBlockType
-      : data.getRandomBlockType;
-
-    data.currentBlockType = data.blockNumberArray
-      ? data.currentBlockType
-      : data.getRandomBlockType;
-  }
-
-  function makeBlockTypeShape(data) {
-    if (data.currentBlockType === "squre") return makeSqureShape(data);
-    // blockType마다 함수 실행시키기
-  }
-
-  function makeSqureShape(data) {
-    const blockNumber = data.blockNumberArray
-      ? data.blockNumberArray
-      : [
-          `${CENTER_POSITION_NUMBER}`,
-          `${CENTER_POSITION_NUMBER + 1}`,
-          `${CENTER_POSITION_NUMBER + 10}`,
-          `${CENTER_POSITION_NUMBER + 11}`,
-        ];
-    console.log(blockNumber);
-    currentBlockType = "squre";
-    currentBlockArray = blockNumber;
-    data.currentBlockType = "squre";
-    data.currentBlockArray = blockNumber;
-  }
-
   function gameOver() {
     modal.style.display = "block";
     gameRunning = false;
   }
 
-  function paintBlock(color) {
-    currentBlockArray.map((item) => {
+  function paintBlock(data, color) {
+    data.currentBlockNumberArray.map((item) => {
       const miniBlock = document.querySelector(
         `.tetris__gridItem[data-id="${item}"]`
       );
@@ -201,6 +215,7 @@ function removeCurrentBlock() {
 }
 
 function makeNewBlockNumberArray() {
+  // blockline에서 canblockmove할필요가 잇나?
   if (currentBlockType === "blockLine" && canBlockMove()) {
     return currentBlockArray.map((b) => `${+b + 10}`);
   }
@@ -212,7 +227,7 @@ function makeNewBlockNumberArray() {
       return currentBlockArray.map((b) => `${+b - 1}`);
 
     if (currentKeyPress === "ArrowUp") return currentBlockArray;
-    // arrowUP에 버그 있음 확인
+
     if (currentKeyPress === "ArrowDown")
       return currentBlockArray.map((b) => `${+b + 10}`);
   }
@@ -223,14 +238,13 @@ function makeNewBlockNumberArray() {
 function canBlockMove() {
   const dataAboutMove = getDataAboutMove();
   if (canFutureBlockExist(dataAboutMove)) return true;
-  // if (currentBlockType === "squre" && canFutureBlockMove()) return true;
-  // if (currentBlockType === "blockLine" && canFutureBlockMove()) return true;
+
   return false;
 
   function getDataAboutMove() {
     const result = {};
     result.futureBlockArray = makeFutureBlockArray();
-    console.log(result.futureBlockArray);
+
     result.isBlockOverRightGameMap = isBlockOverRightGameMap(
       result.futureBlockArray
     );
@@ -241,13 +255,14 @@ function canBlockMove() {
       result.futureBlockArray
     );
     result.isFutureBlockOverGameMap = isFutureBlockOverGameMap(result);
-    console.log(result.isFutureBlockOverGameMap);
+
     result.isAlreadyBlockThere = isAlreadyBlockThere;
     result.canfutureBlockPainted = canfutureBlockPainted;
     return result;
   }
 
   function makeFutureBlockArray() {
+    console.log(currentBlockArray);
     if (currentKeyPress === "ArrowLeft") {
       return currentBlockArray
         .map((b) => +b - 1)
@@ -296,7 +311,6 @@ function canBlockMove() {
   }
 
   function isAlreadyBlockThere(futureBlock) {
-    console.log(2);
     const futureBlockColor = window
       .getComputedStyle(
         document.querySelector(`.tetris__gridItem[data-id="${futureBlock}"]`)
@@ -481,7 +495,7 @@ function blockSave() {
 
     function moveAllBlockLineToBottom(data) {
       const inGameData = makeDataAboutMoveBlockLine();
-      console.log(inGameData);
+
       moveRemainBlockDown(inGameData);
 
       function makeDataAboutMoveBlockLine() {
@@ -559,10 +573,11 @@ function blockSave() {
               for (let j = 0; j < enrichedData.removedBlockLine.length; j++) {
                 currentKeyPress = "ArrowDown";
                 moveBlock();
-                currentBlockArray = currentBlockArray.map((b) => +b + 10);
+                // currentBlockArray = currentBlockArray.map((b) => +b + 10);
               }
             }
           }
+          // currentBlockType = "";
         }
       }
     }
@@ -593,7 +608,7 @@ function blockSave() {
       }
 
       function resetGameData(maxHeightBlockLine) {
-        currentBlockType = "squre";
+        currentBlockType = "";
         maxHeightBlockLine += removedBlockLine.length;
         removedBlockLine.length = 0;
       }

@@ -1,5 +1,7 @@
 "use strict";
 
+import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
+
 const menu = document.querySelector(".tetris__menu");
 const playingBtn = document.querySelector(".tetris__playingBtn");
 const checkBtn = document.querySelector(".tetris__checkBtn");
@@ -525,26 +527,9 @@ function blockSave() {
       }
 
       function moveRemainBlockDown(inGameData) {
-        const enrichedData = getEnrichedData(inGameData);
+        // const enrichedData = getEnrichedData(inGameData);
+        const enrichedData = new EnrichedBlockLineData(inGameData);
         moveTargetBlockLineToDown(enrichedData);
-
-        function getEnrichedData(inGameData) {
-          if (inGameData.isBlockLineRemoved && inGameData.isRemainBlockGoDown) {
-            let result = { ...inGameData };
-            result.targetBlockLineNumberArray = [];
-
-            for (let i = 0; i < result.numberOfBlockLine; i++) {
-              const targetBlockLine = result.boundryToDown - i;
-              const targetBlockLineNumberArray =
-                result.getBlockLineNumberArray(targetBlockLine);
-
-              result.targetBlockLineNumberArray.push(
-                targetBlockLineNumberArray
-              );
-            }
-            return result;
-          }
-        }
 
         function moveTargetBlockLineToDown(enrichedData) {
           if (enrichedData?.targetBlockLineNumberArray?.length) {

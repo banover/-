@@ -8,6 +8,7 @@ const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
 const modal = document.querySelector(".tetris__gameOverModal");
 
+const GAME_MAP_HEIGHT = 15;
 const CENTER_POSITION_NUMBER = 5;
 const MAX_HEIGHT_OF_GAME_MAP = 14;
 const DEFAULT_SCORE = 0;
@@ -26,28 +27,28 @@ let maxHeightBlockLine = MAX_HEIGHT_OF_GAME_MAP;
 let removedBlockLine = [];
 let blockColorArray;
 // let shouldBeRemoved;
-let turn = true;
+// let turn = true;
 let isBlockGoingDown;
 let score = DEFAULT_SCORE;
 let gameRunning = true;
 
 function playGame(e) {
-  // console.log(e);
-  menu.style.display = "none";
+  menu.style.visibility = "hidden";
   makeGameMap();
+  gameStart();
 }
 
 // 게임 시작 버튼을 누르면 게임 시작
-// playingBtn.addEventListener("click", playGame);
-makeGameMap();
-gameStart();
+playingBtn.addEventListener("click", playGame);
+// makeGameMap();
+//   gameStart();
 
 // **********************************************************************
 // 여기서부터는 함수
 // **********************************************************************
 
 function makeGameMap() {
-  for (let i = 0; i < 150; i++) {
+  for (let i = 0; i < GAME_MAP_HEIGHT * 10; i++) {
     const gridItem = makeGridItem(i);
     appendGridItemToGameMap(gridItem);
   }
@@ -56,9 +57,9 @@ function makeGameMap() {
     const gridCell = document.createElement("div");
     gridCell.classList.add("tetris__gridItem");
     gridCell.setAttribute("data-id", i + 1);
-    // if (i < 10) {
-    //   gridCell.style.visibility = "hidden";
-    // }
+    if (i < 10) {
+      gridCell.style.visibility = "hidden";
+    }
     return gridCell;
   }
 
@@ -92,16 +93,11 @@ function makeBlock(blockNumberArray) {
       ? setBlockNumberArray(blockNumberArray)
       : makeBlockNumberArray(result);
 
-    console.log(result.currentBlockNumberArray);
+    result.isBlockTypeBlockLine = result.currentBlockType === "blockLine";
 
-    result.isBlockTypeBlockLine = isBlockTypeBlockLine(result.currentBlockType);
-
-    // result.selectTypeOfBlock = selectTypeOfBlock(result);
     result.isThereEmptySpace = result.isFirstBlock
       ? true
       : isThereEmptySpace(result.currentBlockNumberArray);
-
-    result.canBlockExist = canBlockExist(result);
 
     return result;
   }
@@ -113,16 +109,6 @@ function makeBlock(blockNumberArray) {
     currentBlockType = blockType[blockTypeNumber];
     return blockType[blockTypeNumber];
   }
-
-  function isBlockTypeBlockLine() {
-    return currentBlockType === "blockLine";
-  }
-
-  // function selectTypeOfBlock(data) {
-  //   currentBlockType = data.currentBlockNumberArray
-  //     ? data.currentBlockType
-  //     : data.getRandomBlockType;
-  // }
 
   function setBlockNumberArray(blockNumberArray) {
     currentBlockArray = blockNumberArray;
@@ -161,16 +147,12 @@ function makeBlock(blockNumberArray) {
     });
   }
 
-  function canBlockExist(data) {
-    return data.isThereEmptySpace;
-  }
-
   function paintBlocks(data) {
     if (data.isBlockTypeBlockLine) {
       return paintBlockLine(data.currentBlockNumberArray);
     }
 
-    if (!data.canBlockExist) return gameOver();
+    if (!data.isThereEmptySpace) return gameOver();
     paintBlock(data, "red");
   }
 
@@ -187,6 +169,7 @@ function makeBlock(blockNumberArray) {
 
   function gameOver() {
     modal.style.display = "block";
+    menu.style.visibility = "visible";
     gameRunning = false;
   }
 
@@ -299,7 +282,7 @@ function canBlockMove() {
   }
 
   function isBlockOverBottomGameMap(futureBlockArray) {
-    return futureBlockArray.some((b) => +b > 150);
+    return futureBlockArray.some((b) => +b > GAME_MAP_HEIGHT * 10);
   }
 
   function isFutureBlockOverGameMap(data) {
@@ -402,7 +385,7 @@ function blockSave() {
       function getBlockLinesOfLastSavedBlock() {
         const blockLineArray = result.lastSavedBlockNumberArray
           .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
-          .filter((b) => b < 15);
+          .filter((b) => b < GAME_MAP_HEIGHT);
 
         return [...new Set(blockLineArray)];
         // 개선하자면 굳이 lastSavedBlockNumberArray를 다 map하기보다는 부분만 사용하겠금...
@@ -459,6 +442,7 @@ function blockSave() {
       }
 
       function removeBlockLineFullOfColor(blockLineData) {
+        console.log(blockLineData);
         for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
           if (blockLineData[i].isfull) {
             removeBlockLine(blockLineData[i].blockLineNumberArray);

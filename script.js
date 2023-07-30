@@ -1,6 +1,8 @@
 "use strict";
 
 import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
+import BlockLineData from "./BlockLineData.js";
+import BlockLineDataForRemove from "./BlockLineDataForRemove.js";
 
 const menu = document.querySelector(".tetris__menu");
 const playingBtn = document.querySelector(".tetris__playingBtn");
@@ -95,6 +97,8 @@ function makeBlock(blockNumberArray) {
       ? setBlockNumberArray(blockNumberArray)
       : makeBlockNumberArray(result);
 
+    console.log(result.currentBlockNumberArray);
+
     result.isBlockTypeBlockLine = result.currentBlockType === "blockLine";
 
     result.isThereEmptySpace = result.isFirstBlock
@@ -138,6 +142,7 @@ function makeBlock(blockNumberArray) {
   }
 
   function isThereEmptySpace(blockNumberArray) {
+    console.log(blockNumberArray);
     return !blockNumberArray.some((b) => {
       const blockColor = window
         .getComputedStyle(
@@ -311,6 +316,7 @@ function canBlockMove() {
 
   function canFutureBlockExist(data) {
     if (currentBlockType !== "blockLine" && data.isFutureBlockOverGameMap) {
+      console.log("canFutureBlockExitst 통과");
       return false;
     }
 
@@ -365,7 +371,7 @@ function blockSave() {
       removefullColorLine(blockSaveData);
       moveAllBlockLineToBottom(blockSaveData);
       renderScore();
-      startNextBlcok(blockSaveData.maxHeightBlockLine);
+      startNextBlock(blockSaveData);
       // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
     }
 
@@ -376,6 +382,7 @@ function blockSave() {
       result.lastSavedBlockLines = getBlockLinesOfLastSavedBlock();
       result.smallestBlockLine = Math.min(...result.lastSavedBlockLines);
       result.maxHeightBlockLine = getMaxHeightBlockLine();
+      result.removedBlockLine = [];
 
       return result;
 
@@ -403,13 +410,17 @@ function blockSave() {
 
     function removefullColorLine(data) {
       const blockLineData = getBlockLineData(data);
+      // const blockLineData = ;
       removeBlockLineFullOfColor(blockLineData);
-      saveRemovedBlockLine(blockLineData);
+      saveRemovedBlockLine(blockLineData, data);
 
       function getBlockLineData() {
         const result = [];
         for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
+          //
+          //
           result.push(getDataOfBlockLineColor(data.lastSavedBlockLines[i]));
+          // result.push(new BlockLineDataForRemove(data.lastSavedBlockLines[i]));
         }
         return result;
       }
@@ -446,8 +457,13 @@ function blockSave() {
       function removeBlockLineFullOfColor(blockLineData) {
         console.log(blockLineData);
         for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
+          console.log(blockLineData[i].isfull);
           if (blockLineData[i].isfull) {
             removeBlockLine(blockLineData[i].blockLineNumberArray);
+            // removeBlcokLine하고 나서 다시 blockLindData의 정보를 살피면 getter인 isfull이 다시 계산되어서 false로 전환된다.
+            // 따라서 그냥 class안에 별도의 removedblockline을 만들어서 쓰자..
+
+            console.log(blockLineData[i]);
           }
         }
 
@@ -460,13 +476,13 @@ function blockSave() {
         }
       }
 
-      function saveRemovedBlockLine(blockLineData) {
+      function saveRemovedBlockLine(blockLineData, data) {
         for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
           if (blockLineData[i].isfull) {
-            removedBlockLine.push(blockLineData[i].blockLine);
+            data.removedBlockLine.push(blockLineData[i].blockLine);
           }
         }
-        console.log(removedBlockLine);
+        console.log(data.removedBlockLine);
       }
     }
 
@@ -480,54 +496,10 @@ function blockSave() {
     }
 
     function moveAllBlockLineToBottom(data) {
-      const inGameData = makeDataAboutMoveBlockLine();
-
+      const inGameData = new BlockLineData(data);
       moveRemainBlockDown(inGameData);
 
-      function makeDataAboutMoveBlockLine() {
-        const result = {};
-        result.removedBlockLine = removedBlockLine;
-        result.numberOfBlockLineTodown = result.removedBlockLine.length;
-        result.boundryToDown = +removedBlockLine[0] - 1;
-        result.boundryToTop = data.maxHeightBlockLine;
-        result.minRemovedBlockLine = Math.min(...removedBlockLine);
-        result.numberOfBlockLine =
-          result.boundryToDown - result.boundryToTop + 1;
-
-        result.isRemainBlockGoDown = isRemainBlockGoDown(result);
-        result.isBlockLineRemoved = isBlockLineRemoved(result);
-        result.getBlockLineColors = getBlockLineColors;
-        result.getBlockLineNumberArray = getBlockLineNumberArray;
-
-        return result;
-
-        function isRemainBlockGoDown() {
-          return result.minRemovedBlockLine > result.boundryToTop;
-        }
-
-        function isBlockLineRemoved(data) {
-          return result.numberOfBlockLineTodown > 0;
-        }
-
-        function getBlockLineColors(targetBlockLineNumberArray) {
-          const result = [];
-
-          targetBlockLineNumberArray.map((b) => {
-            const blockColor = window
-              .getComputedStyle(
-                document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
-              )
-              .getPropertyValue("background-color");
-
-            result.push(blockColor);
-          });
-
-          return result;
-        }
-      }
-
       function moveRemainBlockDown(inGameData) {
-        // const enrichedData = getEnrichedData(inGameData);
         const enrichedData = new EnrichedBlockLineData(inGameData);
         moveTargetBlockLineToDown(enrichedData);
 
@@ -565,8 +537,8 @@ function blockSave() {
       }
     }
 
-    function startNextBlcok(data) {
-      if (removedBlockLine.length) {
+    function startNextBlock(data) {
+      if (data.removedBlockLine.length) {
         resetGameData(data);
       }
 
@@ -576,10 +548,10 @@ function blockSave() {
         blockSave();
       }
 
-      function resetGameData(maxHeightBlockLine) {
+      function resetGameData(data) {
         currentBlockType = "";
-        maxHeightBlockLine += removedBlockLine.length;
-        removedBlockLine.length = 0;
+        data.maxHeightBlockLine += data.removedBlockLine.length;
+        data.removedBlockLine.length = 0;
       }
     }
   }

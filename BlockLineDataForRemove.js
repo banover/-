@@ -17,6 +17,10 @@ export default class BlockLineDataForRemove {
     return this.CheckFullColorLine();
   }
 
+  get isBlockLineRemoved() {
+    return 0;
+  }
+
   getBlockLineNumberArray() {
     const result = [];
     for (let i = 1; i < 11; i++) {

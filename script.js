@@ -36,7 +36,111 @@ let isBlockGoingDown;
 let score = DEFAULT_SCORE;
 let gameRunning = true;
 
-function playGame(e) {
+class globalData {
+  constructor(MAX_HEIGHT_OF_GAME_MAP, DEFAULT_SCORE) {
+    this.currentBlockArray = null;
+    this.currentBlockType = null;
+    this.currentKeyPress = null;
+    this.lastSavedBlockNumberArray = null;
+    this.lastSavedBlockLine = null;
+    this.maxHeightBlockLine = MAX_HEIGHT_OF_GAME_MAP;
+    this.removedBlockLine = [];
+    this.blockColorArray = null;
+    this.isBlockGoingDown = null;
+    this.score = DEFAULT_SCORE;
+    this.gameRunning = true;
+  }
+
+  get currentBlockArray() {
+    return this.currentBlockArray;
+  }
+
+  set currentBlockArray(value) {
+    this.currentBlockArray = value;
+  }
+
+  get currentBlockType() {
+    return this.currentBlockType;
+  }
+
+  set currentBlockType(value) {
+    this.currentBlockType = value;
+  }
+
+  get currentKeyPress() {
+    return this.currentKeyPress;
+  }
+
+  set currentKeyPress(value) {
+    this.currentKeyPress = value;
+  }
+
+  get lastSavedBlockNumberArray() {
+    return this.lastSavedBlockNumberArray;
+  }
+
+  set lastSavedBlockNumberArray(value) {
+    this.lastSavedBlockNumberArray = value;
+  }
+
+  get lastSavedBlockLine() {
+    return this.lastSavedBlockLine;
+  }
+
+  set lastSavedBlockLine(value) {
+    this.lastSavedBlockLine = value;
+  }
+
+  get maxHeightBlockLine() {
+    return this.maxHeightBlockLine;
+  }
+
+  set maxHeightBlockLine(value) {
+    this.maxHeightBlockLine = value;
+  }
+
+  get removedBlockLine() {
+    return this.removedBlockLine;
+  }
+
+  set removedBlockLine(value) {
+    this.removedBlockLine = value;
+  }
+
+  get blockColorArray() {
+    return this.blockColorArray;
+  }
+
+  set blockColorArray(value) {
+    this.blockColorArray = value;
+  }
+
+  get isBlockGoingDown() {
+    return this.isBlockGoingDown;
+  }
+
+  set isBlockGoingDown(value) {
+    this.isBlockGoingDown = value;
+  }
+
+  get score() {
+    return this.score;
+  }
+
+  set score(value) {
+    this.score = value;
+  }
+
+  get gameRunning() {
+    return this.gameRunning;
+  }
+
+  set gameRunning(value) {
+    this.gameRunning = value;
+  }
+}
+
+function playGame() {
   menu.style.visibility = "hidden";
   makeGameMap();
   gameStart();
@@ -375,6 +479,56 @@ function blockSave() {
       // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
     }
 
+    class LastSavedBlockData {
+      constructor(globalData, GAME_MAP_HEIGHT) {
+        this.currentBlockArray = globalData.currentBlockArray;
+        this.GAME_MAP_HEIGHT = GAME_MAP_HEIGHT;
+        this.maxHeightBlockLine = globalData.maxHeightBlockLine;
+        this.removedBlockLine = globalData.removedBlockLine;
+      }
+
+      get lastSavedBlockNumberArray() {
+        return this.currentBlockArray;
+      }
+
+      get lastSavedBlockLines() {
+        return this.getBlockLinesOfLastSavedBlock();
+      }
+
+      get smallestBlockLine() {
+        return Math.min(...this.lastSavedBlockLines);
+      }
+
+      get maxHeightBlockLine() {
+        return getMaxHeightBlockLine();
+      }
+
+      get removedBlockLine() {
+        return this.removedBlockLine;
+      }
+
+      set removedBlockLine(value) {
+        this.removedBlockLine.push(value);
+      }
+
+      getBlockLinesOfLastSavedBlock() {
+        const blockLineArray = this.lastSavedBlockNumberArray
+          .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
+          .filter((b) => b < this.GAME_MAP_HEIGHT);
+
+        return [...new Set(blockLineArray)];
+        // 개선하자면 굳이 lastSavedBlockNumberArray를 다 map하기보다는 부분만 사용하겠금...
+      }
+
+      getMaxHeightBlockLine() {
+        if (this.smallestBlockLine < this.maxHeightBlockLine) {
+          // globalData.maxHeightBlockLine(this.smallestBlockLine);
+          maxHeightBlockLine = result.smallestBlockLine;
+        }
+        return maxHeightBlockLine;
+      }
+    }
+
     function setDataAboutLastSavedBlock() {
       const result = {};
 
@@ -410,48 +564,15 @@ function blockSave() {
 
     function removefullColorLine(data) {
       const blockLineData = getBlockLineData(data);
-      // const blockLineData = ;
+
       removeBlockLineFullOfColor(blockLineData);
-      saveRemovedBlockLine(blockLineData, data);
 
       function getBlockLineData() {
         const result = [];
         for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
-          //
-          //
-          result.push(getDataOfBlockLineColor(data.lastSavedBlockLines[i]));
-          // result.push(new BlockLineDataForRemove(data.lastSavedBlockLines[i]));
+          result.push(new BlockLineDataForRemove(data.lastSavedBlockLines[i]));
         }
         return result;
-      }
-
-      function getDataOfBlockLineColor(blockLine) {
-        const result = {};
-
-        result.blockLine = blockLine;
-        result.blockLineNumberArray = getBlockLineNumberArray(result.blockLine);
-        result.isWhiteBlock = isWhiteBlock;
-        result.isfull = CheckFullColorLine();
-
-        return result;
-
-        function isWhiteBlock(blockNumber) {
-          const BlockColor = window
-            .getComputedStyle(
-              document.querySelector(
-                `.tetris__gridItem[data-id="${blockNumber}"]`
-              )
-            )
-            .getPropertyValue("background-color");
-
-          return BlockColor === "rgb(255, 255, 255)";
-        }
-
-        function CheckFullColorLine() {
-          return !result.blockLineNumberArray.some((blockNumber) =>
-            result.isWhiteBlock(blockNumber)
-          );
-        }
       }
 
       function removeBlockLineFullOfColor(blockLineData) {
@@ -460,8 +581,9 @@ function blockSave() {
           console.log(blockLineData[i].isfull);
           if (blockLineData[i].isfull) {
             removeBlockLine(blockLineData[i].blockLineNumberArray);
-            // removeBlcokLine하고 나서 다시 blockLindData의 정보를 살피면 getter인 isfull이 다시 계산되어서 false로 전환된다.
-            // 따라서 그냥 class안에 별도의 removedblockline을 만들어서 쓰자..
+            data.removedBlockLine.push(blockLineData[i].blockLine);
+            // data.removedBlockLine(blockLineData[i].blockLine)
+            // LastSavedBlockData class를 활용하게 되면 위 코드로 대체해야 한다.
 
             console.log(blockLineData[i]);
           }
@@ -474,15 +596,6 @@ function blockSave() {
             ).style.backgroundColor = "white";
           });
         }
-      }
-
-      function saveRemovedBlockLine(blockLineData, data) {
-        for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
-          if (blockLineData[i].isfull) {
-            data.removedBlockLine.push(blockLineData[i].blockLine);
-          }
-        }
-        console.log(data.removedBlockLine);
       }
     }
 

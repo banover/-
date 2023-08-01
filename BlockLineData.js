@@ -1,6 +1,8 @@
 export default class BlockLineData {
+  // #globalData;
   #originalData;
   constructor(data) {
+    // this.#globalData = globalData;
     this.#originalData = data;
   }
 

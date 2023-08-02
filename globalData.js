@@ -79,9 +79,10 @@ export default class GlobalData {
 
   set removedBlockLine(value) {
     if (value === 0) {
-      this.#removedBlockLine = [];
+      // this.#removedBlockLine = [];
+      this.#removedBlockLine.length = 0;
     } else {
-      this.#removedBlockLine = value;
+      this.#removedBlockLine.push(value);
     }
   }
 

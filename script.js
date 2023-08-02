@@ -1,6 +1,6 @@
 "use strict";
 
-import GlobalData from "./globalData.js";
+import GlobalData from "./GlobalData.js";
 import LastSavedBlockData from "./LastSavedBlockData.js";
 import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
 import BlockLineData from "./BlockLineData.js";
@@ -12,6 +12,7 @@ const checkBtn = document.querySelector(".tetris__checkBtn");
 const nextItemBox = document.querySelector(".tetris__nextItemBox");
 const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
+
 const modal = document.querySelector(".tetris__gameOverModal");
 
 const GAME_MAP_HEIGHT = 15;
@@ -23,31 +24,13 @@ const SCORE_PER_ONE_LINE_BLOCK = 5;
 // 배열로 만들어 놨다가 추후에 random으로 currentBlockShape으로 값 넘겨주기
 const blockShape = ["squre"];
 
-// let currentBlockArray;
-
-// let currentBlockType;
-// let currentKeyPress;
-// let lastSavedBlockNumberArray;
-// let lastSavedBlockLine;
-// let maxHeightBlockLine = MAX_HEIGHT_OF_GAME_MAP;
-// let removedBlockLine = [];
-// let blockColorArray;
-// // let shouldBeRemoved;
-// // let turn = true;
-// let isBlockGoingDown;
-// let score = DEFAULT_SCORE;
-// let gameRunning = true;
-
 function playGame() {
-  menu.style.visibility = "hidden";
+  // menu.style.visibility = "hidden";
   makeGameMap();
   gameStart();
 }
 
-// 게임 시작 버튼을 누르면 게임 시작
 playingBtn.addEventListener("click", playGame);
-// makeGameMap();
-//   gameStart();
 
 // **********************************************************************
 // 여기서부터는 함수
@@ -56,7 +39,7 @@ playingBtn.addEventListener("click", playGame);
 function makeGameMap() {
   for (let i = 0; i < GAME_MAP_HEIGHT * 10; i++) {
     const gridItem = makeGridItem(i);
-    appendGridItemToGameMap(gridItem);
+    playingBox.append(gridItem);
   }
 
   function makeGridItem(i) {
@@ -68,23 +51,12 @@ function makeGameMap() {
     }
     return gridCell;
   }
-
-  function appendGridItemToGameMap(gridItem) {
-    playingBox.append(gridItem);
-  }
 }
 
 function gameStart() {
-  console.log("gameStart 진입");
-
   const globalData = new GlobalData(MAX_HEIGHT_OF_GAME_MAP, DEFAULT_SCORE);
-  // makeBlock();
-  // moveBlockDownPerSecond();
-  // keyPressHandler();
-  // blockSave();
-  console.log("makeblock 진입");
+
   makeBlock(globalData);
-  console.log("moveBlockDownperSecond 진입");
   moveBlockDownPerSecond(globalData);
   keyPressHandler(globalData);
   blockSave(globalData);
@@ -95,7 +67,7 @@ function makeBlock(globalData, blockNumberArray) {
     globalData,
     blockNumberArray
   );
-  console.log(DataAboutMakeBlock);
+
   paintBlocks(globalData, DataAboutMakeBlock);
 
   function getDataAboutMakeBlock(globalData, blockNumberArray) {
@@ -109,16 +81,12 @@ function makeBlock(globalData, blockNumberArray) {
       ? globalData.currentBlockType
       : getRandomBlockType(globalData);
 
-    console.log(result.currentBlockType);
-
     result.currentBlockNumberArray = blockNumberArray
       ? setBlockNumberArray(globalData, blockNumberArray)
       : makeBlockNumberArray(globalData, result);
 
-    console.log(result.currentBlockNumberArray);
-
     result.isBlockTypeBlockLine = result.currentBlockType === "blockLine";
-    console.log(result.isBlockTypeBlockLine);
+
     result.isThereEmptySpace = result.isFirstBlock
       ? true
       : isThereEmptySpace(result.currentBlockNumberArray);
@@ -131,16 +99,14 @@ function makeBlock(globalData, blockNumberArray) {
     const randomNumber = Math.floor(Math.random() * blockType.length);
     const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
     globalData.currentBlockType = blockType[blockTypeNumber];
-    // globalData.currentBlockType(blockType[blockTypeNumber]);
-    // currentBlockType = blockType[blockTypeNumber];
+
     return blockType[blockTypeNumber];
   }
 
   function setBlockNumberArray(globalData, blockNumberArray) {
     console.log(blockNumberArray);
     globalData.currentBlockArray = blockNumberArray;
-    // globalData.currentBlockArray(blockNumberArray);
-    // currentBlockArray = blockNumberArray;
+
     return blockNumberArray;
   }
 
@@ -161,7 +127,6 @@ function makeBlock(globalData, blockNumberArray) {
         ];
 
     globalData.currentBlockArray = blockNumber;
-    // currentBlockArray = blockNumber;
 
     return blockNumber;
   }
@@ -195,15 +160,12 @@ function makeBlock(globalData, blockNumberArray) {
       );
       miniBlock.style.backgroundColor = globalData.blockColorArray[index];
     });
-    // blockColorArray = [];
   }
-  // }
 
   function gameOver(globalData) {
     modal.style.display = "block";
     menu.style.visibility = "visible";
-    globalData.gameRunning(false);
-    // gameRunning = false;
+    globalData.gameRunning = false;
   }
 
   function paintBlock(data, color) {
@@ -217,18 +179,12 @@ function makeBlock(globalData, blockNumberArray) {
 }
 
 function moveBlock(globalData) {
-  console.log("moveBlock 진입");
-  console.log(globalData);
   removeCurrentBlock(globalData);
   makeBlock(globalData, makeNewBlockNumberArray(globalData));
 }
 
 function removeCurrentBlock(globalData) {
-  console.log("removeCurrentBlock 진입");
-  console.log(globalData);
   globalData.currentBlockArray.map((b) => {
-    // currentBlockArray.map((b) => {
-    console.log(b);
     const miniBlock = document.querySelector(
       `.tetris__gridItem[data-id="${b}"]`
     );
@@ -237,8 +193,8 @@ function removeCurrentBlock(globalData) {
 }
 
 function makeNewBlockNumberArray(globalData) {
-  // blockline에서 canblockmove할필요가 잇나?
-  if (globalData.currentBlockType === "blockLine" && canBlockMove(globalData)) {
+  // if (globalData.currentBlockType === "blockLine" && canBlockMove(globalData)) {
+  if (globalData.currentBlockType === "blockLine") {
     return globalData.currentBlockArray.map((b) => `${+b + 10}`);
   }
 
@@ -369,7 +325,6 @@ function canBlockMove(globalData) {
       globalData.currentBlockType !== "blockLine" &&
       data.isFutureBlockOverGameMap
     ) {
-      console.log("canFutureBlockExitst 통과");
       return false;
     }
 
@@ -379,8 +334,7 @@ function canBlockMove(globalData) {
 
 function moveBlockDownPerSecond(globalData) {
   globalData.isBlockGoingDown = true;
-  // globalData.isBlockGoingDown(true);
-  // isBlockGoingDown = true;
+
   const setIntervalMoveBlockDown = setInterval(
     moveBlockDown.bind(null, globalData),
     1000
@@ -388,9 +342,7 @@ function moveBlockDownPerSecond(globalData) {
 
   function moveBlockDown(globalData) {
     globalData.currentKeyPress = "ArrowDown";
-    // globalData.currentKeyPress("ArrowDown");
-    // currentKeyPress = "ArrowDown";
-    console.log(canBlockMove(globalData));
+
     canBlockMove(globalData)
       ? moveBlock(globalData)
       : clearIntervalMoveBlockDown(globalData);
@@ -399,9 +351,6 @@ function moveBlockDownPerSecond(globalData) {
   function clearIntervalMoveBlockDown() {
     clearInterval(setIntervalMoveBlockDown);
     globalData.isBlockGoingDown = false;
-    // globalData.isBlockGoingDown(false);
-    // isBlockGoingDown = false;
-    // turn = false;
   }
 }
 
@@ -411,8 +360,6 @@ function keyPressHandler(globalData) {
 
     function isArrowKeyPressed(globalData, key) {
       globalData.currentKeyPress = key;
-      // globalData.currentKeyPress(key);
-      // currentKeyPress = key;
 
       return (
         globalData.currentKeyPress === "ArrowRight" ||
@@ -425,61 +372,21 @@ function keyPressHandler(globalData) {
 }
 
 function blockSave(globalData) {
-  // const setIntervalCheckBlockIsStop = setInterval(checkBlockIsStop, 500); checkBlockIsStop.bind(null, data) 이런식으로 data 넣을 수 있음
-  // data와 로직을 분리하자!
   const setIntervalCheckBlockIsStop = setInterval(
     checkBlockIsStop.bind(null, globalData),
     500
   );
 
   function checkBlockIsStop(globalData) {
-    // if (!isBlockGoingDown && !turn) {
     if (!globalData.isBlockGoingDown) {
       clearInterval(setIntervalCheckBlockIsStop);
-      // turn = true;
-      // const blockSaveData = setDataAboutLastSavedBlock(globalData);
+
       const blockSaveData = new LastSavedBlockData(globalData, GAME_MAP_HEIGHT);
       removefullColorLine(globalData, blockSaveData);
       moveAllBlockLineToBottom(globalData, blockSaveData);
       renderScore(globalData);
       startNextBlock(globalData, blockSaveData);
       // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
-    }
-
-    function setDataAboutLastSavedBlock(globalData) {
-      const result = {};
-
-      result.lastSavedBlockNumberArray =
-        getLastSavedBlockNumberArray(globalData);
-      result.lastSavedBlockLines = getBlockLinesOfLastSavedBlock();
-      result.smallestBlockLine = Math.min(...result.lastSavedBlockLines);
-      result.maxHeightBlockLine = getMaxHeightBlockLine(globalData);
-      result.removedBlockLine = [];
-
-      return result;
-
-      function getLastSavedBlockNumberArray(globalData) {
-        globalData.lastSavedBlockNumberArray(globalData.currentBlockArray);
-        // lastSavedBlockNumberArray = currentBlockArray;
-        return globalData.lastSavedBlockNumberArray;
-      }
-
-      function getBlockLinesOfLastSavedBlock() {
-        const blockLineArray = result.lastSavedBlockNumberArray
-          .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
-          .filter((b) => b < GAME_MAP_HEIGHT);
-
-        return [...new Set(blockLineArray)];
-        // 개선하자면 굳이 lastSavedBlockNumberArray를 다 map하기보다는 부분만 사용하겠금...
-      }
-
-      function getMaxHeightBlockLine(globalData) {
-        if (result.smallestBlockLine < globalData.maxHeightBlockLine) {
-          globalData.maxHeightBlockLine(result.smallestBlockLine);
-          // maxHeightBlockLine = result.smallestBlockLine;
-        }
-        return globalData.maxHeightBlockLine;
-      }
     }
 
     function removefullColorLine(globalData, data) {
@@ -496,18 +403,11 @@ function blockSave(globalData) {
       }
 
       function removeBlockLineFullOfColor(globalData, blockLineData) {
-        console.log(blockLineData);
         for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
-          console.log(blockLineData[i].isfull);
           if (blockLineData[i].isfull) {
             removeBlockLine(blockLineData[i].blockLineNumberArray);
-            // data.removedBlockLine.push(blockLineData[i].blockLine);
-            // globalData.removedBlockLine = blockLineData[i].blockLine; 이게 필요없을 수도..?
-            data.removedBlockLine = blockLineData[i].blockLine;
-            // data.removedBlockLine(blockLineData[i].blockLine);
-            // LastSavedBlockData class를 활용하게 되면 위 코드로 대체해야 한다.
 
-            console.log(blockLineData[i]);
+            globalData.removedBlockLine = blockLineData[i].blockLine;
           }
         }
 
@@ -521,27 +421,15 @@ function blockSave(globalData) {
       }
     }
 
-    function getBlockLineNumberArray(blockLine) {
-      const result = [];
-      for (let i = 1; i < 11; i++) {
-        result.push(blockLine !== 0 ? blockLine * 10 + i : i);
-      }
-
-      return result;
-    }
-
     function moveAllBlockLineToBottom(globalData, data) {
-      console.log(data);
       const inGameData = new BlockLineData(data);
       moveRemainBlockDown(globalData, inGameData);
 
       function moveRemainBlockDown(globalData, inGameData) {
-        console.log(inGameData);
         const enrichedData = new EnrichedBlockLineData(inGameData);
         moveTargetBlockLineToDown(globalData, enrichedData);
 
         function moveTargetBlockLineToDown(globalData, enrichedData) {
-          console.log(enrichedData);
           if (enrichedData?.targetBlockLineNumberArray?.length) {
             for (let i = 0; i < enrichedData.numberOfBlockLine; i++) {
               globalData.currentBlockArray =
@@ -553,27 +441,24 @@ function blockSave(globalData) {
               for (let j = 0; j < enrichedData.removedBlockLine.length; j++) {
                 globalData.currentKeyPress = "ArrowDown";
                 moveBlock(globalData);
-                // currentBlockArray = currentBlockArray.map((b) => +b + 10);
               }
             }
           }
-          // currentBlockType = "";
         }
       }
     }
 
     function renderScore(globalData) {
-      const scoreElement = document.querySelector(".tetris__scoreBox");
       if (globalData.removedBlockLine.length) {
         for (let i = 0; i < globalData.removedBlockLine.length; i++) {
           addScore(globalData);
         }
       }
-      scoreElement.textContent = `점수: ${globalData.score}`;
+
+      scoreBox.textContent = `점수: ${globalData.score}`;
 
       function addScore(globalData) {
-        globalData.score(globalData.score + SCORE_PER_ONE_LINE_BLOCK);
-        // score += SCORE_PER_ONE_LINE_BLOCK;
+        globalData.score = globalData.score + SCORE_PER_ONE_LINE_BLOCK;
       }
     }
 
@@ -592,14 +477,8 @@ function blockSave(globalData) {
         globalData.currentBlockType = "";
         data.maxHeightBlockLine =
           data.maxHeightBlockLine + data.removedBlockLine.length;
-        // data.maxHeightBlockLine(
-        //   data.maxHeightBlockLine + data.removedBlockLine.length
-        // );
-        // data.maxHeightBlockLine += data.removedBlockLine.length;
+
         data.removedBlockLine = 0;
-        // data.removedBlockLine(0);
-        // data.removedBlockLine.length = 0;
-        //
       }
     }
   }

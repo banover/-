@@ -1,6 +1,7 @@
 "use strict";
 
 import GlobalData from "./GlobalData.js";
+import BlockMoveData from "/BlockMoveData.js";
 import LastSavedBlockData from "./LastSavedBlockData.js";
 import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
 import BlockLineData from "./BlockLineData.js";
@@ -228,97 +229,11 @@ function makeNewBlockNumberArray(globalData) {
 }
 
 function canBlockMove(globalData) {
-  const dataAboutMove = getDataAboutMove(globalData);
+  const dataAboutMove = new BlockMoveData(globalData, GAME_MAP_HEIGHT);
+
   if (canFutureBlockExist(globalData, dataAboutMove)) return true;
 
   return false;
-
-  function getDataAboutMove(globalData) {
-    const result = {};
-    result.futureBlockArray = makeFutureBlockArray(globalData);
-
-    result.isBlockOverRightGameMap = isBlockOverRightGameMap(
-      globalData,
-      result.futureBlockArray
-    );
-    result.isBlockOverLeftGameMap = isBlockOverLeftGameMap(
-      globalData,
-      result.futureBlockArray
-    );
-    result.isBlockOverBottomGameMap = isBlockOverBottomGameMap(
-      result.futureBlockArray
-    );
-    result.isFutureBlockOverGameMap = isFutureBlockOverGameMap(result);
-
-    result.isAlreadyBlockThere = isAlreadyBlockThere;
-    result.canfutureBlockPainted = canfutureBlockPainted;
-    return result;
-  }
-
-  function makeFutureBlockArray(globalData) {
-    console.log(globalData.currentBlockArray);
-    if (globalData.currentKeyPress === "ArrowLeft") {
-      // if (currentKeyPress === "ArrowLeft") {
-      return globalData.currentBlockArray
-        .map((b) => +b - 1)
-        .filter((b) => !globalData.currentBlockArray.includes(`${b}`));
-    }
-
-    if (globalData.currentKeyPress === "ArrowRight") {
-      return globalData.currentBlockArray
-        .map((b) => +b + 1)
-        .filter((b) => !globalData.currentBlockArray.includes(`${b}`));
-    }
-
-    if (globalData.currentKeyPress === "ArrowDown") {
-      return globalData.currentBlockArray
-        .map((b) => +b + 10)
-        .filter((b) => !globalData.currentBlockArray.includes(`${b}`));
-    }
-
-    if (globalData.currentKeyPress === "ArrowUp")
-      return globalData.currentBlockArray;
-  }
-
-  function isBlockOverRightGameMap(globalData, futureBlockArray) {
-    return (
-      globalData.currentBlockArray.some((b) => b % 10 === 0) &&
-      futureBlockArray.some((b) => b % 10 === 1)
-    );
-  }
-
-  function isBlockOverLeftGameMap(globalData, futureBlockArray) {
-    return (
-      globalData.currentBlockArray.some((b) => b % 10 === 1) &&
-      futureBlockArray.some((b) => b % 10 === 0)
-    );
-  }
-
-  function isBlockOverBottomGameMap(futureBlockArray) {
-    return futureBlockArray.some((b) => +b > GAME_MAP_HEIGHT * 10);
-  }
-
-  function isFutureBlockOverGameMap(data) {
-    return data.isBlockOverRightGameMap ||
-      data.isBlockOverLeftGameMap ||
-      data.isBlockOverBottomGameMap
-      ? true
-      : false;
-  }
-
-  function isAlreadyBlockThere(futureBlock) {
-    const futureBlockColor = window
-      .getComputedStyle(
-        document.querySelector(`.tetris__gridItem[data-id="${futureBlock}"]`)
-      )
-      .getPropertyValue("background-color");
-
-    return futureBlockColor !== "rgb(255, 255, 255)";
-  }
-
-  function canfutureBlockPainted(data) {
-    return !data.futureBlockArray.some((b) => data.isAlreadyBlockThere(b));
-  }
 
   function canFutureBlockExist(globalData, data) {
     if (
@@ -328,7 +243,7 @@ function canBlockMove(globalData) {
       return false;
     }
 
-    return data.canfutureBlockPainted(data);
+    return data.canfutureBlockPainted();
   }
 }
 

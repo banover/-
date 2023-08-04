@@ -1,6 +1,7 @@
 "use strict";
 
 import GlobalData from "./GlobalData.js";
+import BlockMakeData from "./BlockMakeData.js";
 import BlockMoveData from "/BlockMoveData.js";
 import LastSavedBlockData from "./LastSavedBlockData.js";
 import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
@@ -64,86 +65,14 @@ function gameStart() {
 }
 
 function makeBlock(globalData, blockNumberArray) {
-  const DataAboutMakeBlock = getDataAboutMakeBlock(
+  const DataAboutMakeBlock = new BlockMakeData(
     globalData,
-    blockNumberArray
+    blockNumberArray,
+    MAX_HEIGHT_OF_GAME_MAP,
+    CENTER_POSITION_NUMBER
   );
 
   paintBlocks(globalData, DataAboutMakeBlock);
-
-  function getDataAboutMakeBlock(globalData, blockNumberArray) {
-    console.log(blockNumberArray);
-    const result = {};
-
-    result.isFirstBlock =
-      globalData.maxHeightBlockLine === MAX_HEIGHT_OF_GAME_MAP ? true : false;
-
-    result.currentBlockType = globalData.currentBlockType
-      ? globalData.currentBlockType
-      : getRandomBlockType(globalData);
-
-    result.currentBlockNumberArray = blockNumberArray
-      ? setBlockNumberArray(globalData, blockNumberArray)
-      : makeBlockNumberArray(globalData, result);
-
-    result.isBlockTypeBlockLine = result.currentBlockType === "blockLine";
-
-    result.isThereEmptySpace = result.isFirstBlock
-      ? true
-      : isThereEmptySpace(result.currentBlockNumberArray);
-
-    return result;
-  }
-
-  function getRandomBlockType(globalData) {
-    const blockType = ["squre"];
-    const randomNumber = Math.floor(Math.random() * blockType.length);
-    const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
-    globalData.currentBlockType = blockType[blockTypeNumber];
-
-    return blockType[blockTypeNumber];
-  }
-
-  function setBlockNumberArray(globalData, blockNumberArray) {
-    console.log(blockNumberArray);
-    globalData.currentBlockArray = blockNumberArray;
-
-    return blockNumberArray;
-  }
-
-  function makeBlockNumberArray(globalData, data) {
-    if (data.currentBlockType === "squre")
-      return makeSqureNumberArray(globalData, data);
-    // blockType마다 함수 실행시키기
-  }
-
-  function makeSqureNumberArray(globalData, data) {
-    const blockNumber = data.currentBlockNumberArray
-      ? data.currentBlockNumberArray
-      : [
-          `${CENTER_POSITION_NUMBER}`,
-          `${CENTER_POSITION_NUMBER + 1}`,
-          `${CENTER_POSITION_NUMBER + 10}`,
-          `${CENTER_POSITION_NUMBER + 11}`,
-        ];
-
-    globalData.currentBlockArray = blockNumber;
-
-    return blockNumber;
-  }
-
-  function isThereEmptySpace(blockNumberArray) {
-    console.log(blockNumberArray);
-    return !blockNumberArray.some((b) => {
-      const blockColor = window
-        .getComputedStyle(
-          document.querySelector(`.tetris__gridItem[data-id="${b}"]`)
-        )
-        .getPropertyValue("background-color");
-
-      return blockColor !== "rgb(255, 255, 255)";
-    });
-  }
 
   function paintBlocks(globalData, data) {
     if (data.isBlockTypeBlockLine) {

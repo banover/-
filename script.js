@@ -1,5 +1,12 @@
 "use strict";
 
+import {
+  GAME_MAP_HEIGHT,
+  MAX_HEIGHT_OF_GAME_MAP,
+  CENTER_POSITION_NUMBER,
+  DEFAULT_SCORE,
+  SCORE_PER_ONE_LINE_BLOCK,
+} from "./config.js";
 import GlobalData from "./GlobalData.js";
 import BlockMakeData from "./BlockMakeData.js";
 import BlockMoveData from "/BlockMoveData.js";
@@ -16,12 +23,6 @@ const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
 
 const modal = document.querySelector(".tetris__gameOverModal");
-
-const GAME_MAP_HEIGHT = 15;
-const CENTER_POSITION_NUMBER = 5;
-const MAX_HEIGHT_OF_GAME_MAP = 14;
-const DEFAULT_SCORE = 0;
-const SCORE_PER_ONE_LINE_BLOCK = 5;
 
 // 배열로 만들어 놨다가 추후에 random으로 currentBlockShape으로 값 넘겨주기
 const blockShape = ["squre"];

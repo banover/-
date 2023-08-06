@@ -1,3 +1,5 @@
+import { MAX_HEIGHT_OF_GAME_MAP, CENTER_POSITION_NUMBER } from "./config.js";
+
 export default class BlockMakeData {
   #globalData;
   #blockNumberArray;
@@ -10,9 +12,9 @@ export default class BlockMakeData {
   #isThereEmptySpace;
   constructor(
     globalData,
-    blockNumberArray,
-    MAX_HEIGHT_OF_GAME_MAP,
-    CENTER_POSITION_NUMBER
+    blockNumberArray
+    // MAX_HEIGHT_OF_GAME_MAP,
+    // CENTER_POSITION_NUMBER
   ) {
     this.#globalData = globalData;
     this.#blockNumberArray = blockNumberArray ? blockNumberArray : null;

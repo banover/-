@@ -1,3 +1,5 @@
+import { GAME_MAP_HEIGHT } from "./config.js";
+
 export default class BlockMoveData {
   #globalData;
   #futureBlockArray;
@@ -8,7 +10,7 @@ export default class BlockMoveData {
   #isAlreadyBlockThere;
   #canfutureBlockPainted;
 
-  constructor(globalData, GAME_MAP_HEIGHT) {
+  constructor(globalData) {
     this.#globalData = globalData;
     this.GAME_MAP_HEIGHT = GAME_MAP_HEIGHT;
     this.#futureBlockArray = this.makeFutureBlockArray();

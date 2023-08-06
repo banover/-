@@ -1,3 +1,5 @@
+import { MAX_HEIGHT_OF_GAME_MAP, DEFAULT_SCORE } from "./config.js";
+
 export default class GlobalData {
   #currentBlockArray;
   #currentBlockType;
@@ -11,7 +13,7 @@ export default class GlobalData {
   #score;
   #gameRunning;
 
-  constructor(MAX_HEIGHT_OF_GAME_MAP, DEFAULT_SCORE) {
+  constructor() {
     this.#currentBlockArray = null;
     this.#currentBlockType = null;
     this.#currentKeyPress = null;

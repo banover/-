@@ -1,7 +1,9 @@
+import { GAME_MAP_HEIGHT } from "./config.js";
+
 export default class LastSavedBlockData {
   #globalData;
   #removedBlockLine;
-  constructor(globalData, GAME_MAP_HEIGHT) {
+  constructor(globalData) {
     this.#globalData = globalData;
     this.currentBlockArray = globalData.currentBlockArray;
     this.GAME_MAP_HEIGHT = GAME_MAP_HEIGHT;

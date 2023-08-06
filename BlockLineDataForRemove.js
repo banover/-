@@ -1,24 +1,26 @@
 export default class BlockLineDataForRemove {
   #blockLine;
+  #blockLineNumberArray;
+  #isWhiteBlock;
+  #isfull;
   constructor(blockLine) {
     this.#blockLine = blockLine;
+    this.#blockLineNumberArray = this.getBlockLineNumberArray();
+    this.#isWhiteBlock = this.isWhiteBlock;
+    this.#isfull = this.CheckFullColorLine();
   }
 
   get blockLine() {
     return this.#blockLine;
   }
   get blockLineNumberArray() {
-    return this.getBlockLineNumberArray();
+    return this.#blockLineNumberArray;
   }
   get isWhiteBlock() {
-    return this.isWhiteBlock;
+    return this.#isWhiteBlock;
   }
   get isfull() {
-    return this.CheckFullColorLine();
-  }
-
-  get isBlockLineRemoved() {
-    return 0;
+    return this.#isfull;
   }
 
   getBlockLineNumberArray() {

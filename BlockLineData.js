@@ -1,35 +1,49 @@
 export default class BlockLineData {
-  // #globalData;
   #originalData;
+  #removedBlockLine;
+  #numberOfBlockLineTodown;
+  #boundryToDown;
+  #boundryToTop;
+  #minRemovedBlockLine;
+  #numberOfBlockLine;
+  #isRemainBlockGoDown;
+  #isBlockLineRemoved;
   constructor(data) {
-    // this.#globalData = globalData;
     this.#originalData = data;
+    this.#removedBlockLine = this.#originalData.removedBlockLine;
+    this.#numberOfBlockLineTodown = this.removedBlockLine.length;
+    this.#boundryToDown = Number(this.removedBlockLine[0]) - 1;
+    this.#boundryToTop = this.#originalData.maxHeightBlockLine;
+    this.#minRemovedBlockLine = Math.min(...this.removedBlockLine);
+    this.#numberOfBlockLine = this.boundryToDown - this.boundryToTop + 1;
+    this.#isRemainBlockGoDown = this.isRemainBlockGoDown();
+    this.#isBlockLineRemoved = this.isBlockLineRemoved();
   }
 
   get removedBlockLine() {
-    return this.#originalData.removedBlockLine;
+    return this.#removedBlockLine;
   }
 
   get numberOfBlockLineTodown() {
-    return this.removedBlockLine.length;
+    return this.#numberOfBlockLineTodown;
   }
   get boundryToDown() {
-    return Number(this.removedBlockLine[0]) - 1;
+    return this.#boundryToDown;
   }
   get boundryToTop() {
-    return this.#originalData.maxHeightBlockLine;
+    return this.#boundryToTop;
   }
   get minRemovedBlockLine() {
-    return Math.min(...this.removedBlockLine);
+    return this.#minRemovedBlockLine;
   }
   get numberOfBlockLine() {
-    return this.boundryToDown - this.boundryToTop + 1;
+    return this.#numberOfBlockLine;
   }
   get isRemainBlockGoDown() {
-    return this.isRemainBlockGoDown();
+    return this.#isRemainBlockGoDown;
   }
   get isBlockLineRemoved() {
-    return this.isBlockLineRemoved();
+    return this.#isBlockLineRemoved;
   }
   get getBlockLineColors() {
     return this.getBlockLineColors;

@@ -2,12 +2,19 @@ import { GAME_MAP_HEIGHT } from "./config.js";
 
 export default class LastSavedBlockData {
   #globalData;
+  #lastSavedBlockLines;
+  #smallestBlockLine;
+  #maxHeightBlockLine;
   #removedBlockLine;
   constructor(globalData) {
     this.#globalData = globalData;
     this.currentBlockArray = globalData.currentBlockArray;
     this.GAME_MAP_HEIGHT = GAME_MAP_HEIGHT;
-    this.maxHeightBlockLine = globalData.maxHeightBlockLine;
+
+    this.#lastSavedBlockLines = this.getBlockLinesOfLastSavedBlock();
+    this.#smallestBlockLine = Math.min(...this.lastSavedBlockLines);
+    this.#maxHeightBlockLine = this.getMaxHeightBlockLine();
+
     this.#removedBlockLine = globalData.removedBlockLine;
   }
 
@@ -16,15 +23,15 @@ export default class LastSavedBlockData {
   }
 
   get lastSavedBlockLines() {
-    return this.getBlockLinesOfLastSavedBlock();
+    return this.#lastSavedBlockLines;
   }
 
   get smallestBlockLine() {
-    return Math.min(...this.lastSavedBlockLines);
+    return this.#smallestBlockLine;
   }
 
   get maxHeightBlockLine() {
-    return this.getMaxHeightBlockLine();
+    return this.#maxHeightBlockLine;
   }
 
   set maxHeightBlockLine(value) {
@@ -54,10 +61,7 @@ export default class LastSavedBlockData {
 
   getMaxHeightBlockLine() {
     if (this.smallestBlockLine < this.#globalData.maxHeightBlockLine) {
-      // globalData.maxHeightBlockLine(this.smallestBlockLine);
       this.#globalData.maxHeightBlockLine = this.smallestBlockLine;
-      // this.#globalData.maxHeightBlockLine(this.smallestBlockLine);
-      // maxHeightBlockLine = result.smallestBlockLine;
     }
     return this.#globalData.maxHeightBlockLine;
   }

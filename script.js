@@ -21,7 +21,6 @@ const checkBtn = document.querySelector(".tetris__checkBtn");
 const nextItemBox = document.querySelector(".tetris__nextItemBox");
 const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
-
 const modal = document.querySelector(".tetris__gameOverModal");
 
 // 배열로 만들어 놨다가 추후에 random으로 currentBlockShape으로 값 넘겨주기

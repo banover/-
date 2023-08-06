@@ -1,39 +1,55 @@
 export default class EnrichedBlockLineData {
   #inGameData;
+  #isBlockLineRemoved;
+  #isRemainBlockGoDown;
+  #numberOfBlockLine;
+  #boundryToDown;
+  #getBlockLineNumberArray;
+  #getBlockLineColors;
+  #removedBlockLine;
+  #targetBlockLineNumberArray;
   constructor(inGameData) {
     this.#inGameData = inGameData;
+    this.#isBlockLineRemoved = this.#inGameData.isBlockLineRemoved;
+    this.#isRemainBlockGoDown = this.#inGameData.isRemainBlockGoDown;
+    this.#numberOfBlockLine = this.#inGameData.numberOfBlockLine;
+    this.#boundryToDown = this.#inGameData.boundryToDown;
+    this.#getBlockLineNumberArray = this.#inGameData.getBlockLineNumberArray;
+    this.#getBlockLineColors = this.#inGameData.getBlockLineColors;
+    this.#removedBlockLine = this.#inGameData.removedBlockLine;
+    this.#targetBlockLineNumberArray = this.getTargetBlockLineNumberArray();
   }
 
   get isBlockLineRemoved() {
-    return this.#inGameData.isBlockLineRemoved;
+    return this.#isBlockLineRemoved;
   }
 
   get isRemainBlockGoDown() {
-    return this.#inGameData.isRemainBlockGoDown;
+    return this.#isRemainBlockGoDown;
   }
 
   get numberOfBlockLine() {
-    return this.#inGameData.numberOfBlockLine;
+    return this.#numberOfBlockLine;
   }
 
   get boundryToDown() {
-    return this.#inGameData.boundryToDown;
+    return this.#boundryToDown;
   }
 
   get getBlockLineNumberArray() {
-    return this.#inGameData.getBlockLineNumberArray;
+    return this.#getBlockLineNumberArray;
   }
 
   get getBlockLineColors() {
-    return this.#inGameData.getBlockLineColors;
+    return this.#getBlockLineColors;
   }
 
   get removedBlockLine() {
-    return this.#inGameData.removedBlockLine;
+    return this.#removedBlockLine;
   }
 
   get targetBlockLineNumberArray() {
-    return this.getTargetBlockLineNumberArray();
+    return this.#targetBlockLineNumberArray;
   }
 
   getTargetBlockLineNumberArray() {

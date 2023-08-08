@@ -6,6 +6,7 @@ export default class BlockMoveData {
   #isBlockOverRightGameMap;
   #isBlockOverLeftGameMap;
   #isBlockOverBottomGameMap;
+  #isBlockOverTopGameMap;
   #isFutureBlockOverGameMap;
   #isAlreadyBlockThere;
   #canfutureBlockPainted;
@@ -17,8 +18,10 @@ export default class BlockMoveData {
     this.#isBlockOverRightGameMap = this.BlockOverRightGameMap();
     this.#isBlockOverLeftGameMap = this.BlockOverLeftGameMap();
     this.#isBlockOverBottomGameMap = this.BlockOverBottomGameMap();
+    this.#isBlockOverTopGameMap = this.BlockOverTopGameMap();
     this.#isFutureBlockOverGameMap = this.FutureBlockOverGameMap();
     this.#isAlreadyBlockThere = this.AlreadyBlockThere;
+
     this.#canfutureBlockPainted = this.checkCanfutureBlockPainted;
   }
 
@@ -35,6 +38,9 @@ export default class BlockMoveData {
   get isBlockOverBottomGameMap() {
     return this.#isBlockOverBottomGameMap;
   }
+  get isBlockOverTopGameMap() {
+    return this.#isBlockOverTopGameMap;
+  }
   get isFutureBlockOverGameMap() {
     return this.#isFutureBlockOverGameMap;
   }
@@ -47,15 +53,13 @@ export default class BlockMoveData {
 
   makeFutureBlockArray() {
     if (this.#globalData.currentKeyPress === "ArrowLeft") {
-      return this.#globalData.currentBlockArray
-        .map((b) => +b - 1)
-        .filter((b) => !this.#globalData.currentBlockArray.includes(`${b}`));
+      return this.#globalData.currentBlockArray.map((b) => +b - 1);
+      // .filter((b) => !this.#globalData.currentBlockArray.includes(`${b}`));
     }
 
     if (this.#globalData.currentKeyPress === "ArrowRight") {
-      return this.#globalData.currentBlockArray
-        .map((b) => +b + 1)
-        .filter((b) => !this.#globalData.currentBlockArray.includes(`${b}`));
+      return this.#globalData.currentBlockArray.map((b) => +b + 1);
+      // .filter((b) => !this.#globalData.currentBlockArray.includes(`${b}`));
     }
 
     if (this.#globalData.currentKeyPress === "ArrowDown") {
@@ -64,20 +68,79 @@ export default class BlockMoveData {
         .filter((b) => !this.#globalData.currentBlockArray.includes(`${b}`));
     }
 
-    if (this.#globalData.currentKeyPress === "ArrowUp")
+    if (this.#globalData.currentKeyPress === "ArrowUp") {
+      if (this.#globalData.currentBlockType === "bar") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 18}`;
+          }
+          if (i === 1) {
+            return `${+b - 9}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b + 9}`;
+          }
+        });
+        return blockArray;
+      }
+
+      if (this.#globalData.currentBlockType === "bar-vertical") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 18}`;
+          }
+          if (i === 1) {
+            return `${+b + 9}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b - 9}`;
+          }
+        });
+        return blockArray;
+      }
       return this.#globalData.currentBlockArray;
+    }
   }
 
   BlockOverRightGameMap() {
+    if (this.#globalData.currentBlockType === "bar-vertical") {
+      return (
+        this.#globalData.currentBlockArray.some((b) => b % 10 === 0) &&
+        this.futureBlockArray.some((b) => b % 10 === 1)
+      );
+    }
     return (
-      this.#globalData.currentBlockArray.some((b) => b % 10 === 0) &&
+      // this.#globalData.currentBlockArray.some((b) => b % 10 === 0) &&
+      this.futureBlockArray.some((b) => b % 10 === 0) &&
       this.futureBlockArray.some((b) => b % 10 === 1)
     );
   }
 
   BlockOverLeftGameMap() {
+    if (this.#globalData.currentBlockType === "bar-vertical") {
+      if (
+        this.#globalData.currentBlockArray.some((b) => b % 10 === 1) &&
+        this.futureBlockArray.some((b) => b % 10 === 0)
+      ) {
+        return true;
+      }
+
+      // if (
+      //   this.futureBlockArray.some((b) => b % 10 === 1) &&
+      //   this.futureBlockArray.some((b) => b % 10 === 0)
+      // ) {
+      //   return true;
+      // }
+    }
     return (
-      this.#globalData.currentBlockArray.some((b) => b % 10 === 1) &&
+      // this.#globalData.currentBlockArray.some((b) => b % 10 === 1) &&
+      this.futureBlockArray.some((b) => b % 10 === 1) &&
       this.futureBlockArray.some((b) => b % 10 === 0)
     );
   }
@@ -86,10 +149,15 @@ export default class BlockMoveData {
     return this.futureBlockArray.some((b) => +b > this.GAME_MAP_HEIGHT * 10);
   }
 
+  BlockOverTopGameMap() {
+    return this.futureBlockArray.some((b) => +b < 1);
+  }
+
   FutureBlockOverGameMap() {
     return this.isBlockOverRightGameMap ||
       this.isBlockOverLeftGameMap ||
-      this.isBlockOverBottomGameMap
+      this.isBlockOverBottomGameMap ||
+      this.isBlockOverTopGameMap
       ? true
       : false;
   }

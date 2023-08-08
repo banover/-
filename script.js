@@ -1,5 +1,8 @@
 "use strict";
 
+// script.js 에서 map과 game으로 Class 추출하던지 해서 더 객체지향프로그래밍을 완성시켜보자.
+// 객체지향 완성 후, 추가 기능 넣고 design하던지 하자!
+
 import {
   GAME_MAP_HEIGHT,
   MAX_HEIGHT_OF_GAME_MAP,
@@ -56,7 +59,7 @@ function makeGameMap() {
 }
 
 function gameStart() {
-  const globalData = new GlobalData(MAX_HEIGHT_OF_GAME_MAP, DEFAULT_SCORE);
+  const globalData = new GlobalData();
 
   makeBlock(globalData);
   moveBlockDownPerSecond(globalData);
@@ -65,13 +68,8 @@ function gameStart() {
 }
 
 function makeBlock(globalData, blockNumberArray) {
-  const DataAboutMakeBlock = new BlockMakeData(
-    globalData,
-    blockNumberArray,
-    MAX_HEIGHT_OF_GAME_MAP,
-    CENTER_POSITION_NUMBER
-  );
-
+  const DataAboutMakeBlock = new BlockMakeData(globalData, blockNumberArray);
+  console.log(DataAboutMakeBlock);
   paintBlocks(globalData, DataAboutMakeBlock);
 
   function paintBlocks(globalData, data) {
@@ -128,7 +126,9 @@ function makeNewBlockNumberArray(globalData) {
     return globalData.currentBlockArray.map((b) => `${+b + 10}`);
   }
 
-  if (globalData.currentBlockType === "squre" && canBlockMove(globalData)) {
+  console.log(canBlockMove(globalData));
+  if (canBlockMove(globalData)) {
+    // if (globalData.currentBlockType === "squre" && canBlockMove(globalData)) {
     if (globalData.currentKeyPress === "ArrowRight") {
       const BlockArray = globalData.currentBlockArray.map((b) => `${+b + 1}`);
       globalData.currentBlockArray = BlockArray;
@@ -136,6 +136,7 @@ function makeNewBlockNumberArray(globalData) {
       return globalData.currentBlockArray;
     }
     if (globalData.currentKeyPress === "ArrowLeft") {
+      console.log(canBlockMove(globalData));
       const BlockArray = globalData.currentBlockArray.map((b) => `${+b - 1}`);
       globalData.currentBlockArray = BlockArray;
 
@@ -143,7 +144,49 @@ function makeNewBlockNumberArray(globalData) {
     }
 
     if (globalData.currentKeyPress === "ArrowUp") {
-      return globalData.currentBlockArray;
+      if (globalData.currentBlockType === "squre") {
+        return globalData.currentBlockArray;
+      }
+      console.log(globalData.currentBlockArray);
+      if (globalData.currentBlockType === "bar") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 18}`;
+          }
+          if (i === 1) {
+            return `${+b - 9}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b + 9}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "bar-vertical";
+
+        return globalData.currentBlockArray;
+      }
+      if (globalData.currentBlockType === "bar-vertical") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 18}`;
+          }
+          if (i === 1) {
+            return `${+b + 9}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b - 9}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "bar";
+        return globalData.currentBlockArray;
+      }
     }
 
     if (globalData.currentKeyPress === "ArrowDown") {
@@ -154,17 +197,45 @@ function makeNewBlockNumberArray(globalData) {
     }
   }
 
+  // if (globalData.currentBlockType === "bar" && canBlockMove(globalData)) {
+  //   if (globalData.currentKeyPress === "ArrowRight") {
+  //     const BlockArray = globalData.currentBlockArray.map((b) => `${+b + 1}`);
+  //     globalData.currentBlockArray = BlockArray;
+
+  //     return globalData.currentBlockArray;
+  //   }
+  //   if (globalData.currentKeyPress === "ArrowLeft") {
+  //     const BlockArray = globalData.currentBlockArray.map((b) => `${+b - 1}`);
+  //     globalData.currentBlockArray = BlockArray;
+
+  //     return globalData.currentBlockArray;
+  //   }
+
+  //   if (globalData.currentKeyPress === "ArrowUp") {
+  //     return globalData.currentBlockArray;
+  //   }
+
+  //   if (globalData.currentKeyPress === "ArrowDown") {
+  //     const BlockArray = globalData.currentBlockArray.map((b) => `${+b + 10}`);
+  //     globalData.currentBlockArray = BlockArray;
+
+  //     return globalData.currentBlockArray;
+  //   }
+  // }
+
   return globalData.currentBlockArray;
 }
 
 function canBlockMove(globalData) {
-  const dataAboutMove = new BlockMoveData(globalData, GAME_MAP_HEIGHT);
-
+  const dataAboutMove = new BlockMoveData(globalData);
+  console.log(dataAboutMove);
+  console.log(canFutureBlockExist(globalData, dataAboutMove));
   if (canFutureBlockExist(globalData, dataAboutMove)) return true;
 
   return false;
 
   function canFutureBlockExist(globalData, data) {
+    console.log(data.isFutureBlockOverGameMap);
     if (
       globalData.currentBlockType !== "blockLine" &&
       data.isFutureBlockOverGameMap
@@ -225,7 +296,7 @@ function blockSave(globalData) {
     if (!globalData.isBlockGoingDown) {
       clearInterval(setIntervalCheckBlockIsStop);
 
-      const blockSaveData = new LastSavedBlockData(globalData, GAME_MAP_HEIGHT);
+      const blockSaveData = new LastSavedBlockData(globalData);
       removefullColorLine(globalData, blockSaveData);
       moveAllBlockLineToBottom(globalData, blockSaveData);
       renderScore(globalData);
@@ -307,9 +378,10 @@ function blockSave(globalData) {
     }
 
     function startNextBlock(globalData, data) {
-      if (data.removedBlockLine.length) {
-        resetGameData(globalData, data);
-      }
+      // if (data.removedBlockLine.length) {
+      //   resetGameData(globalData, data);
+      // }
+      resetGameData(globalData, data);
 
       makeBlock(globalData);
       if (globalData.gameRunning) {
@@ -319,8 +391,11 @@ function blockSave(globalData) {
 
       function resetGameData(globalData, data) {
         globalData.currentBlockType = "";
-        data.maxHeightBlockLine =
-          data.maxHeightBlockLine + data.removedBlockLine.length;
+        data.maxHeightBlockLine = data.removedBlockLine.length
+          ? data.maxHeightBlockLine + data.removedBlockLine.length
+          : data.maxHeightBlockLine;
+        // data.maxHeightBlockLine =
+        //   data.maxHeightBlockLine + data.removedBlockLine.length;
 
         data.removedBlockLine = 0;
       }

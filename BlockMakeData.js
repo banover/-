@@ -55,10 +55,12 @@ export default class BlockMakeData {
   }
 
   getRandomBlockType() {
-    const blockType = ["squre"];
+    const blockType = ["squre", "bar"];
     const randomNumber = Math.floor(Math.random() * blockType.length);
-    const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
+    // const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
+    const blockTypeNumber = randomNumber;
     this.#globalData.currentBlockType = blockType[blockTypeNumber];
+    console.log(randomNumber);
 
     return blockType[blockTypeNumber];
   }
@@ -71,6 +73,7 @@ export default class BlockMakeData {
 
   makeBlockNumberArray() {
     if (this.currentBlockType === "squre") return this.makeSqureNumberArray();
+    if (this.currentBlockType === "bar") return this.makeBarNumberArray();
     // blockType마다 함수 실행시키기
   }
 
@@ -82,6 +85,21 @@ export default class BlockMakeData {
           `${this.#CENTER_POSITION_NUMBER + 1}`,
           `${this.#CENTER_POSITION_NUMBER + 10}`,
           `${this.#CENTER_POSITION_NUMBER + 11}`,
+        ];
+
+    this.#globalData.currentBlockArray = blockNumber;
+
+    return blockNumber;
+  }
+
+  makeBarNumberArray() {
+    const blockNumber = this.currentBlockNumberArray
+      ? this.currentBlockNumberArray
+      : [
+          `${this.#CENTER_POSITION_NUMBER - 1}`,
+          `${this.#CENTER_POSITION_NUMBER}`,
+          `${this.#CENTER_POSITION_NUMBER + 1}`,
+          `${this.#CENTER_POSITION_NUMBER + 2}`,
         ];
 
     this.#globalData.currentBlockArray = blockNumber;

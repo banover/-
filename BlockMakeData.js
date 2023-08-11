@@ -55,7 +55,7 @@ export default class BlockMakeData {
   }
 
   getRandomBlockType() {
-    const blockType = ["squre", "bar", "z"];
+    const blockType = ["squre", "bar", "z", "z-reverse"];
     const randomNumber = Math.floor(Math.random() * blockType.length);
     // const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
     const blockTypeNumber = randomNumber;
@@ -75,6 +75,8 @@ export default class BlockMakeData {
     if (this.currentBlockType === "squre") return this.makeSqureNumberArray();
     if (this.currentBlockType === "bar") return this.makeBarNumberArray();
     if (this.currentBlockType === "z") return this.makeZNumberArray();
+    if (this.currentBlockType === "z-reverse")
+      return this.makeZreverseNumberArray();
     // blockType마다 함수 실행시키기
   }
 
@@ -116,6 +118,21 @@ export default class BlockMakeData {
           `${this.#CENTER_POSITION_NUMBER}`,
           `${this.#CENTER_POSITION_NUMBER + 10}`,
           `${this.#CENTER_POSITION_NUMBER + 11}`,
+        ];
+
+    this.#globalData.currentBlockArray = blockNumber;
+
+    return blockNumber;
+  }
+
+  makeZreverseNumberArray() {
+    const blockNumber = this.currentBlockNumberArray
+      ? this.currentBlockNumberArray
+      : [
+          `${this.#CENTER_POSITION_NUMBER - 1}`,
+          `${this.#CENTER_POSITION_NUMBER}`,
+          `${this.#CENTER_POSITION_NUMBER + 8}`,
+          `${this.#CENTER_POSITION_NUMBER + 9}`,
         ];
 
     this.#globalData.currentBlockArray = blockNumber;

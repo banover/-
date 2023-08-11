@@ -226,6 +226,46 @@ function makeNewBlockNumberArray(globalData) {
         globalData.currentBlockType = "z";
         return globalData.currentBlockArray;
       }
+
+      if (globalData.currentBlockType === "z-reverse") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 10}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b - 9}`;
+          }
+          if (i === 3) {
+            return `${+b + 1}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "z-reverse-vertical";
+
+        return globalData.currentBlockArray;
+      }
+      if (globalData.currentBlockType === "z-reverse-vertical") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 10}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b + 9}`;
+          }
+          if (i === 3) {
+            return `${+b - 1}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "z-reverse";
+        return globalData.currentBlockArray;
+      }
     }
 
     if (globalData.currentKeyPress === "ArrowDown") {

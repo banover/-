@@ -139,6 +139,41 @@ export default class BlockMoveData {
         });
         return blockArray;
       }
+
+      if (this.#globalData.currentBlockType === "z-reverse") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 10}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b - 9}`;
+          }
+          if (i === 3) {
+            return `${+b + 1}`;
+          }
+        });
+        return blockArray;
+      }
+      if (this.#globalData.currentBlockType === "z-reverse-vertical") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 10}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b + 9}`;
+          }
+          if (i === 3) {
+            return `${+b - 1}`;
+          }
+        });
+        return blockArray;
+      }
     }
 
     return this.#globalData.currentBlockArray;

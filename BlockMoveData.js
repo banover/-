@@ -104,8 +104,44 @@ export default class BlockMoveData {
         });
         return blockArray;
       }
-      return this.#globalData.currentBlockArray;
+
+      if (this.#globalData.currentBlockType === "z") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 8}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b - 10}`;
+          }
+        });
+        return blockArray;
+      }
+      if (this.#globalData.currentBlockType === "z-vertical") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 8}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b + 10}`;
+          }
+        });
+        return blockArray;
+      }
     }
+
+    return this.#globalData.currentBlockArray;
   }
 
   BlockOverRightGameMap() {
@@ -130,13 +166,6 @@ export default class BlockMoveData {
       ) {
         return true;
       }
-
-      // if (
-      //   this.futureBlockArray.some((b) => b % 10 === 1) &&
-      //   this.futureBlockArray.some((b) => b % 10 === 0)
-      // ) {
-      //   return true;
-      // }
     }
     return (
       // this.#globalData.currentBlockArray.some((b) => b % 10 === 1) &&

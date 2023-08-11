@@ -126,7 +126,6 @@ function makeNewBlockNumberArray(globalData) {
     return globalData.currentBlockArray.map((b) => `${+b + 10}`);
   }
 
-  console.log(canBlockMove(globalData));
   if (canBlockMove(globalData)) {
     // if (globalData.currentBlockType === "squre" && canBlockMove(globalData)) {
     if (globalData.currentKeyPress === "ArrowRight") {
@@ -185,6 +184,46 @@ function makeNewBlockNumberArray(globalData) {
         });
         globalData.currentBlockArray = blockArray;
         globalData.currentBlockType = "bar";
+        return globalData.currentBlockArray;
+      }
+
+      if (globalData.currentBlockType === "z") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 8}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b - 10}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "z-vertical";
+
+        return globalData.currentBlockArray;
+      }
+      if (globalData.currentBlockType === "z-vertical") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 8}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b + 10}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "z";
         return globalData.currentBlockArray;
       }
     }

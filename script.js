@@ -266,6 +266,86 @@ function makeNewBlockNumberArray(globalData) {
         globalData.currentBlockType = "z-reverse";
         return globalData.currentBlockArray;
       }
+
+      if (globalData.currentBlockType === "gun") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 8}`;
+          }
+          if (i === 1) {
+            return `${+b + 1}`;
+          }
+          if (i === 2) {
+            return `${+b + 10}`;
+          }
+          if (i === 3) {
+            return `${+b - 1}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "gun-vertical";
+
+        return globalData.currentBlockArray;
+      }
+      if (globalData.currentBlockType === "gun-vertical") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 8}`;
+          }
+          if (i === 1) {
+            return `${+b + 8}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "gun-side";
+        return globalData.currentBlockArray;
+      }
+
+      if (globalData.currentBlockType === "gun-side") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b}`;
+          }
+          if (i === 1) {
+            return `${+b - 9}`;
+          }
+          if (i === 2) {
+            return `${+b - 1 - 1}`;
+          }
+          if (i === 3) {
+            return `${+b + 10 - 1}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "gun-side-reverse";
+        return globalData.currentBlockArray;
+      }
+
+      if (globalData.currentBlockType === "gun-side-reverse") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 10}`;
+          }
+          if (i === 1) {
+            return `${+b + 10}`;
+          }
+          if (i === 2) {
+            return `${+b + 2}`;
+          }
+          if (i === 3) {
+            return `${+b + 2}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "gun";
+        return globalData.currentBlockArray;
+      }
     }
 
     if (globalData.currentKeyPress === "ArrowDown") {

@@ -127,6 +127,7 @@ function makeNewBlockNumberArray(globalData) {
   }
 
   if (canBlockMove(globalData)) {
+    // return globalData.currentBlockArray;
     // if (globalData.currentBlockType === "squre" && canBlockMove(globalData)) {
     if (globalData.currentKeyPress === "ArrowRight") {
       const BlockArray = globalData.currentBlockArray.map((b) => `${+b + 1}`);
@@ -135,7 +136,6 @@ function makeNewBlockNumberArray(globalData) {
       return globalData.currentBlockArray;
     }
     if (globalData.currentKeyPress === "ArrowLeft") {
-      console.log(canBlockMove(globalData));
       const BlockArray = globalData.currentBlockArray.map((b) => `${+b - 1}`);
       globalData.currentBlockArray = BlockArray;
 
@@ -146,7 +146,7 @@ function makeNewBlockNumberArray(globalData) {
       if (globalData.currentBlockType === "squre") {
         return globalData.currentBlockArray;
       }
-      console.log(globalData.currentBlockArray);
+
       if (globalData.currentBlockType === "bar") {
         const blockArray = globalData.currentBlockArray.map((b, i) => {
           if (i === 0) {
@@ -448,8 +448,7 @@ function makeNewBlockNumberArray(globalData) {
 
 function canBlockMove(globalData) {
   const dataAboutMove = new BlockMoveData(globalData);
-  console.log(dataAboutMove);
-  console.log(canFutureBlockExist(globalData, dataAboutMove));
+
   if (canFutureBlockExist(globalData, dataAboutMove)) return true;
 
   return false;
@@ -463,6 +462,12 @@ function canBlockMove(globalData) {
       return false;
     }
 
+    // if (data.canfutureBlockPainted()) {
+    //   globalData.currentBlockArray = data.futureBlockArray;
+    //   return true;
+    // }
+
+    // return false;
     return data.canfutureBlockPainted();
   }
 }
@@ -542,6 +547,7 @@ function blockSave(globalData) {
           if (blockLineData[i].isfull) {
             removeBlockLine(blockLineData[i].blockLineNumberArray);
 
+            console.log(globalData.removedBlockLine);
             globalData.removedBlockLine = blockLineData[i].blockLine;
           }
         }
@@ -557,11 +563,13 @@ function blockSave(globalData) {
     }
 
     function moveAllBlockLineToBottom(globalData, data) {
-      const inGameData = new BlockLineData(data);
+      const inGameData = new BlockLineData(globalData, data);
+      console.log(inGameData);
       moveRemainBlockDown(globalData, inGameData);
 
       function moveRemainBlockDown(globalData, inGameData) {
         const enrichedData = new EnrichedBlockLineData(inGameData);
+        console.log(enrichedData);
         moveTargetBlockLineToDown(globalData, enrichedData);
 
         function moveTargetBlockLineToDown(globalData, enrichedData) {
@@ -611,13 +619,15 @@ function blockSave(globalData) {
 
       function resetGameData(globalData, data) {
         globalData.currentBlockType = "";
-        data.maxHeightBlockLine = data.removedBlockLine.length
-          ? data.maxHeightBlockLine + data.removedBlockLine.length
+        // data.maxHeightBlockLine = data.removedBlockLine.length
+        globalData.maxHeightBlockLine = data.removedBlockLine.length
+          ? globalData.maxHeightBlockLine + data.removedBlockLine.length
           : data.maxHeightBlockLine;
         // data.maxHeightBlockLine =
         //   data.maxHeightBlockLine + data.removedBlockLine.length;
 
-        data.removedBlockLine = 0;
+        globalData.removedBlockLine = 0;
+        // data.removedBlockLine = 0;
       }
     }
   }

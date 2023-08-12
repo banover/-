@@ -45,8 +45,10 @@ export default class LastSavedBlockData {
   set removedBlockLine(value) {
     if (value === 0) {
       this.#globalData.removedBlockLine = value;
+      // this.removedBlockLine.length = 0;
     } else {
       this.#globalData.removedBlockLine = value;
+      // this.removedBlockLine.push(value);
     }
   }
 

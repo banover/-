@@ -346,6 +346,86 @@ function makeNewBlockNumberArray(globalData) {
         globalData.currentBlockType = "gun";
         return globalData.currentBlockArray;
       }
+
+      if (globalData.currentBlockType === "gun-reverse") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b}`;
+          }
+          if (i === 1) {
+            return `${+b + 9}`;
+          }
+          if (i === 2) {
+            return `${+b + 18}`;
+          }
+          if (i === 3) {
+            return `${+b + 11}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "gun-reverse-vertical";
+
+        return globalData.currentBlockArray;
+      }
+      if (globalData.currentBlockType === "gun-reverse-vertical") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 10}`;
+          }
+          if (i === 1) {
+            return `${+b + 1}`;
+          }
+          if (i === 2) {
+            return `${+b - 8}`;
+          }
+          if (i === 3) {
+            return `${+b - 19}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "gun-reverse-side";
+        return globalData.currentBlockArray;
+      }
+
+      if (globalData.currentBlockType === "gun-reverse-side") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 10}`;
+          }
+          if (i === 1) {
+            return `${+b - 10}`;
+          }
+          if (i === 2) {
+            return `${+b - 1}`;
+          }
+          if (i === 3) {
+            return `${+b + 19}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "gun-reverse-side-reverse";
+        return globalData.currentBlockArray;
+      }
+
+      if (globalData.currentBlockType === "gun-reverse-side-reverse") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b - 9}`;
+          }
+          if (i === 3) {
+            return `${+b - 11}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "gun-reverse";
+        return globalData.currentBlockArray;
+      }
     }
 
     if (globalData.currentKeyPress === "ArrowDown") {
@@ -356,31 +436,12 @@ function makeNewBlockNumberArray(globalData) {
     }
   }
 
-  // if (globalData.currentBlockType === "bar" && canBlockMove(globalData)) {
-  //   if (globalData.currentKeyPress === "ArrowRight") {
-  //     const BlockArray = globalData.currentBlockArray.map((b) => `${+b + 1}`);
-  //     globalData.currentBlockArray = BlockArray;
-
-  //     return globalData.currentBlockArray;
-  //   }
-  //   if (globalData.currentKeyPress === "ArrowLeft") {
-  //     const BlockArray = globalData.currentBlockArray.map((b) => `${+b - 1}`);
-  //     globalData.currentBlockArray = BlockArray;
-
-  //     return globalData.currentBlockArray;
-  //   }
-
-  //   if (globalData.currentKeyPress === "ArrowUp") {
-  //     return globalData.currentBlockArray;
-  //   }
-
-  //   if (globalData.currentKeyPress === "ArrowDown") {
-  //     const BlockArray = globalData.currentBlockArray.map((b) => `${+b + 10}`);
-  //     globalData.currentBlockArray = BlockArray;
-
-  //     return globalData.currentBlockArray;
-  //   }
-  // }
+  //  버그 발견
+  // 1. line에 색 꽉 안 찼는데 제거하는 경우
+  // 2. 제거한 블록 위에 있는 블록들이 안내려오는 경우
+  // 다시 한번 플레이 해보고 기록하기
+  // 그 후 버그 수정
+  // 다시해보니 버그 안생김
 
   return globalData.currentBlockArray;
 }

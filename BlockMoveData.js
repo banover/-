@@ -244,6 +244,76 @@ export default class BlockMoveData {
         });
         return blockArray;
       }
+
+      if (this.#globalData.currentBlockType === "gun-reverse") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b}`;
+          }
+          if (i === 1) {
+            return `${+b + 9}`;
+          }
+          if (i === 2) {
+            return `${+b + 18}`;
+          }
+          if (i === 3) {
+            return `${+b + 11}`;
+          }
+        });
+        return blockArray;
+      }
+      if (this.#globalData.currentBlockType === "gun-reverse-vertical") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 10}`;
+          }
+          if (i === 1) {
+            return `${+b + 1}`;
+          }
+          if (i === 2) {
+            return `${+b - 8}`;
+          }
+          if (i === 3) {
+            return `${+b - 19}`;
+          }
+        });
+        return blockArray;
+      }
+      if (this.#globalData.currentBlockType === "gun-reverse-side") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 10}`;
+          }
+          if (i === 1) {
+            return `${+b - 10}`;
+          }
+          if (i === 2) {
+            return `${+b - 1}`;
+          }
+          if (i === 3) {
+            return `${+b + 19}`;
+          }
+        });
+        return blockArray;
+      }
+
+      if (this.#globalData.currentBlockType === "gun-reverse-side-reverse") {
+        const blockArray = this.#globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b - 9}`;
+          }
+          if (i === 3) {
+            return `${+b - 11}`;
+          }
+        });
+        return blockArray;
+      }
     }
 
     return this.#globalData.currentBlockArray;

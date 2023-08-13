@@ -12,6 +12,8 @@ export default class GlobalData {
   #isBlockGoingDown;
   #score;
   #gameRunning;
+  #justMaked;
+  #currentBlockColor;
 
   constructor() {
     this.#currentBlockArray = null;
@@ -25,6 +27,8 @@ export default class GlobalData {
     this.#isBlockGoingDown = null;
     this.#score = DEFAULT_SCORE;
     this.#gameRunning = true;
+    this.#justMaked = true;
+    this.#currentBlockColor = null;
   }
 
   get currentBlockArray() {
@@ -118,5 +122,20 @@ export default class GlobalData {
 
   set gameRunning(value) {
     this.#gameRunning = value;
+  }
+
+  get justMaked() {
+    return this.#justMaked;
+  }
+
+  set justMaked(value) {
+    this.#justMaked = value;
+  }
+  get currentBlockColor() {
+    return this.#currentBlockColor;
+  }
+
+  set currentBlockColor(value) {
+    this.#currentBlockColor = value;
   }
 }

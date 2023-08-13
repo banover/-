@@ -10,6 +10,7 @@ export default class BlockMakeData {
   #currentBlockNumberArray;
   #isBlockTypeBlockLine;
   #isThereEmptySpace;
+  #blockColor;
   constructor(
     globalData,
     blockNumberArray
@@ -36,6 +37,8 @@ export default class BlockMakeData {
     this.#isThereEmptySpace = this.#isFirstBlock
       ? true
       : this.checkIsThereEmptySpace();
+
+    this.#blockColor = this.getRandomColor();
   }
 
   get isFirstBlock() {
@@ -52,6 +55,9 @@ export default class BlockMakeData {
   }
   get isThereEmptySpace() {
     return this.#isThereEmptySpace;
+  }
+  get blockColor() {
+    return this.#blockColor;
   }
 
   getRandomBlockType() {
@@ -210,5 +216,21 @@ export default class BlockMakeData {
 
       return blockColor !== "rgb(255, 255, 255)";
     });
+  }
+
+  getRandomColor() {
+    const colorType = ["red", "blue", "green"];
+    const randomNumber = Math.floor(Math.random() * colorType.length);
+    // const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
+    // const blockTypeNumber = randomNumber;
+    // this.#globalData.currentBlockType = colorType[randomNumber];
+    // console.log(randomNumber);
+    if (this.#globalData.justMaked) {
+      this.#globalData.currentBlockColor = colorType[randomNumber];
+      this.#globalData.justMaked = false;
+      return colorType[randomNumber];
+    }
+    // return colorType[randomNumber];
+    return this.#globalData.currentBlockColor;
   }
 }

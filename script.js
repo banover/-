@@ -78,7 +78,8 @@ function makeBlock(globalData, blockNumberArray) {
     }
 
     if (!data.isThereEmptySpace) return gameOver(globalData);
-    paintBlock(data, "red");
+    // paintBlock(data, "red");
+    paintBlock(data);
   }
 
   function paintBlockLine(globalData, blockNumberArray) {
@@ -96,12 +97,13 @@ function makeBlock(globalData, blockNumberArray) {
     globalData.gameRunning = false;
   }
 
-  function paintBlock(data, color) {
+  // function paintBlock(data, color) {
+  function paintBlock(data) {
     data.currentBlockNumberArray.map((item) => {
       const miniBlock = document.querySelector(
         `.tetris__gridItem[data-id="${item}"]`
       );
-      miniBlock.style.backgroundColor = `${color}`;
+      miniBlock.style.backgroundColor = `${data.blockColor}`;
     });
   }
 }
@@ -707,6 +709,7 @@ function blockSave(globalData) {
         //   data.maxHeightBlockLine + data.removedBlockLine.length;
 
         globalData.removedBlockLine = 0;
+        globalData.justMaked = true;
         // data.removedBlockLine = 0;
       }
     }

@@ -55,8 +55,16 @@ export default class BlockMakeData {
   }
 
   getRandomBlockType() {
-    const blockType = ["squre", "bar", "z", "z-reverse", "gun", "gun-reverse"];
-    // const blockType = ["z"];
+    const blockType = [
+      "squre",
+      "bar",
+      "z",
+      "z-reverse",
+      "gun",
+      "gun-reverse",
+      "balance",
+    ];
+    // const blockType = ["balance"];
     const randomNumber = Math.floor(Math.random() * blockType.length);
     // const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
     const blockTypeNumber = randomNumber;
@@ -82,6 +90,8 @@ export default class BlockMakeData {
     if (this.currentBlockType === "gun") return this.makeGunNumberArray();
     if (this.currentBlockType === "gun-reverse")
       return this.makeGunReverseNumberArray();
+    if (this.currentBlockType === "balance")
+      return this.makeBalanceNumberArray();
     // blockType마다 함수 실행시키기
   }
 
@@ -167,6 +177,21 @@ export default class BlockMakeData {
           `${this.#CENTER_POSITION_NUMBER}`,
           `${this.#CENTER_POSITION_NUMBER + 1}`,
           `${this.#CENTER_POSITION_NUMBER + 9}`,
+        ];
+
+    this.#globalData.currentBlockArray = blockNumber;
+
+    return blockNumber;
+  }
+
+  makeBalanceNumberArray() {
+    const blockNumber = this.currentBlockNumberArray
+      ? this.currentBlockNumberArray
+      : [
+          `${this.#CENTER_POSITION_NUMBER}`,
+          `${this.#CENTER_POSITION_NUMBER + 9}`,
+          `${this.#CENTER_POSITION_NUMBER + 10}`,
+          `${this.#CENTER_POSITION_NUMBER + 11}`,
         ];
 
     this.#globalData.currentBlockArray = blockNumber;

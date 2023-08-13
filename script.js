@@ -426,6 +426,86 @@ function makeNewBlockNumberArray(globalData) {
         globalData.currentBlockType = "gun-reverse";
         return globalData.currentBlockArray;
       }
+
+      if (globalData.currentBlockType === "balance") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b}`;
+          }
+          if (i === 1) {
+            return `${+b + 1}`;
+          }
+          if (i === 2) {
+            return `${+b + 1}`;
+          }
+          if (i === 3) {
+            return `${+b + 9}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "balance-vertical";
+
+        return globalData.currentBlockArray;
+      }
+      if (globalData.currentBlockType === "balance-vertical") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b + 9}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "balance-side";
+        return globalData.currentBlockArray;
+      }
+
+      if (globalData.currentBlockType === "balance-side") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b - 9}`;
+          }
+          if (i === 1) {
+            return `${+b - 1}`;
+          }
+          if (i === 2) {
+            return `${+b - 1}`;
+          }
+          if (i === 3) {
+            return `${+b}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "balance-side-reverse";
+        return globalData.currentBlockArray;
+      }
+
+      if (globalData.currentBlockType === "balance-side-reverse") {
+        const blockArray = globalData.currentBlockArray.map((b, i) => {
+          if (i === 0) {
+            return `${+b}`;
+          }
+          if (i === 1) {
+            return `${+b}`;
+          }
+          if (i === 2) {
+            return `${+b}`;
+          }
+          if (i === 3) {
+            return `${+b - 9}`;
+          }
+        });
+        globalData.currentBlockArray = blockArray;
+        globalData.currentBlockType = "balance";
+        return globalData.currentBlockArray;
+      }
     }
 
     if (globalData.currentKeyPress === "ArrowDown") {

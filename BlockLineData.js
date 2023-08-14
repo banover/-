@@ -1,4 +1,5 @@
 export default class BlockLineData {
+  #globalData;
   #originalData;
   #removedBlockLine;
   #numberOfBlockLineTodown;
@@ -9,13 +10,15 @@ export default class BlockLineData {
   #isRemainBlockGoDown;
   #isBlockLineRemoved;
   constructor(globalData, data) {
+    this.#globalData = globalData;
     this.#originalData = data;
     // this.#removedBlockLine = this.#originalData.removedBlockLine;
-    this.#removedBlockLine = globalData.removedBlockLine;
+    this.#removedBlockLine = this.#globalData.removedBlockLine;
 
     this.#numberOfBlockLineTodown = this.#removedBlockLine.length;
-    this.#boundryToDown = Number(this.#removedBlockLine[0]) - 1;
-    this.#boundryToTop = this.#originalData.maxHeightBlockLine;
+    // this.#boundryToDown = Number(this.#removedBlockLine[0]) - 1;
+    this.#boundryToDown = Number(this.#globalData.removedBlockLine[0]) - 1;
+    this.#boundryToTop = this.#globalData.maxHeightBlockLine;
     this.#minRemovedBlockLine = Math.min(...this.#removedBlockLine);
     this.#numberOfBlockLine = this.#boundryToDown - this.#boundryToTop + 1;
     this.#isRemainBlockGoDown = this.isRemainBlockGoDown();

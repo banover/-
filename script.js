@@ -17,6 +17,7 @@ import LastSavedBlockData from "./LastSavedBlockData.js";
 import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
 import BlockLineData from "./BlockLineData.js";
 import BlockLineDataForRemove from "./BlockLineDataForRemove.js";
+import BlockNumberArray from "./BlockNumberArray.js";
 
 const menu = document.querySelector(".tetris__menu");
 const playingBtn = document.querySelector(".tetris__playingBtn");
@@ -69,11 +70,12 @@ function gameStart() {
 
 function makeBlock(globalData, blockNumberArray) {
   const DataAboutMakeBlock = new BlockMakeData(globalData, blockNumberArray);
-  console.log(DataAboutMakeBlock);
+  // console.log(DataAboutMakeBlock);
   paintBlocks(globalData, DataAboutMakeBlock);
 
   function paintBlocks(globalData, data) {
     if (data.isBlockTypeBlockLine) {
+      console.log(data.currentBlockNumberArray);
       return paintBlockLine(globalData, data.currentBlockNumberArray);
     }
 
@@ -110,422 +112,19 @@ function makeBlock(globalData, blockNumberArray) {
 
 function moveBlock(globalData) {
   removeCurrentBlock(globalData);
-  makeBlock(globalData, makeNewBlockNumberArray(globalData));
+  const newBlockNumberArrayData = new BlockNumberArray(globalData);
+  // makeBlock(globalData, makeNewBlockNumberArray(globalData));
+  makeBlock(globalData, newBlockNumberArrayData.blockNumberArray);
 }
 
 function removeCurrentBlock(globalData) {
+  console.log(globalData.currentBlockArray);
   globalData.currentBlockArray.map((b) => {
     const miniBlock = document.querySelector(
       `.tetris__gridItem[data-id="${b}"]`
     );
     miniBlock.style.backgroundColor = "white";
   });
-}
-
-function makeNewBlockNumberArray(globalData) {
-  // if (globalData.currentBlockType === "blockLine" && canBlockMove(globalData)) {
-  if (globalData.currentBlockType === "blockLine") {
-    return globalData.currentBlockArray.map((b) => `${+b + 10}`);
-  }
-
-  if (canBlockMove(globalData)) {
-    // return globalData.currentBlockArray;
-    // if (globalData.currentBlockType === "squre" && canBlockMove(globalData)) {
-    if (globalData.currentKeyPress === "ArrowRight") {
-      const BlockArray = globalData.currentBlockArray.map((b) => `${+b + 1}`);
-      globalData.currentBlockArray = BlockArray;
-
-      return globalData.currentBlockArray;
-    }
-    if (globalData.currentKeyPress === "ArrowLeft") {
-      const BlockArray = globalData.currentBlockArray.map((b) => `${+b - 1}`);
-      globalData.currentBlockArray = BlockArray;
-
-      return globalData.currentBlockArray;
-    }
-
-    if (globalData.currentKeyPress === "ArrowUp") {
-      if (globalData.currentBlockType === "squre") {
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "bar") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b - 18}`;
-          }
-          if (i === 1) {
-            return `${+b - 9}`;
-          }
-          if (i === 2) {
-            return `${+b}`;
-          }
-          if (i === 3) {
-            return `${+b + 9}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "bar-vertical";
-
-        return globalData.currentBlockArray;
-      }
-      if (globalData.currentBlockType === "bar-vertical") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b + 18}`;
-          }
-          if (i === 1) {
-            return `${+b + 9}`;
-          }
-          if (i === 2) {
-            return `${+b}`;
-          }
-          if (i === 3) {
-            return `${+b - 9}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "bar";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "z") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b - 8}`;
-          }
-          if (i === 1) {
-            return `${+b}`;
-          }
-          if (i === 2) {
-            return `${+b}`;
-          }
-          if (i === 3) {
-            return `${+b - 10}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "z-vertical";
-
-        return globalData.currentBlockArray;
-      }
-      if (globalData.currentBlockType === "z-vertical") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b + 8}`;
-          }
-          if (i === 1) {
-            return `${+b}`;
-          }
-          if (i === 2) {
-            return `${+b}`;
-          }
-          if (i === 3) {
-            return `${+b + 10}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "z";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "z-reverse") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b - 10}`;
-          }
-          if (i === 1) {
-            return `${+b}`;
-          }
-          if (i === 2) {
-            return `${+b - 9}`;
-          }
-          if (i === 3) {
-            return `${+b + 1}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "z-reverse-vertical";
-
-        return globalData.currentBlockArray;
-      }
-      if (globalData.currentBlockType === "z-reverse-vertical") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b + 10}`;
-          }
-          if (i === 1) {
-            return `${+b}`;
-          }
-          if (i === 2) {
-            return `${+b + 9}`;
-          }
-          if (i === 3) {
-            return `${+b - 1}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "z-reverse";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "gun") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b - 8}`;
-          }
-          if (i === 1) {
-            return `${+b + 1}`;
-          }
-          if (i === 2) {
-            return `${+b + 10}`;
-          }
-          if (i === 3) {
-            return `${+b - 1}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "gun-vertical";
-
-        return globalData.currentBlockArray;
-      }
-      if (globalData.currentBlockType === "gun-vertical") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b + 8}`;
-          }
-          if (i === 1) {
-            return `${+b + 8}`;
-          }
-          if (i === 2) {
-            return `${+b}`;
-          }
-          if (i === 3) {
-            return `${+b}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "gun-side";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "gun-side") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b}`;
-          }
-          if (i === 1) {
-            return `${+b - 9}`;
-          }
-          if (i === 2) {
-            return `${+b - 1 - 1}`;
-          }
-          if (i === 3) {
-            return `${+b + 10 - 1}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "gun-side-reverse";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "gun-side-reverse") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b + 10}`;
-          }
-          if (i === 1) {
-            return `${+b + 10}`;
-          }
-          if (i === 2) {
-            return `${+b + 2}`;
-          }
-          if (i === 3) {
-            return `${+b + 2}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "gun";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "gun-reverse") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b}`;
-          }
-          if (i === 1) {
-            return `${+b + 9}`;
-          }
-          if (i === 2) {
-            return `${+b + 18}`;
-          }
-          if (i === 3) {
-            return `${+b + 11}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "gun-reverse-vertical";
-
-        return globalData.currentBlockArray;
-      }
-      if (globalData.currentBlockType === "gun-reverse-vertical") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b + 10}`;
-          }
-          if (i === 1) {
-            return `${+b + 1}`;
-          }
-          if (i === 2) {
-            return `${+b - 8}`;
-          }
-          if (i === 3) {
-            return `${+b - 19}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "gun-reverse-side";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "gun-reverse-side") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b - 10}`;
-          }
-          if (i === 1) {
-            return `${+b - 10}`;
-          }
-          if (i === 2) {
-            return `${+b - 1}`;
-          }
-          if (i === 3) {
-            return `${+b + 19}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "gun-reverse-side-reverse";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "gun-reverse-side-reverse") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b}`;
-          }
-          if (i === 1) {
-            return `${+b}`;
-          }
-          if (i === 2) {
-            return `${+b - 9}`;
-          }
-          if (i === 3) {
-            return `${+b - 11}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "gun-reverse";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "balance") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b}`;
-          }
-          if (i === 1) {
-            return `${+b + 1}`;
-          }
-          if (i === 2) {
-            return `${+b + 1}`;
-          }
-          if (i === 3) {
-            return `${+b + 9}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "balance-vertical";
-
-        return globalData.currentBlockArray;
-      }
-      if (globalData.currentBlockType === "balance-vertical") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b + 9}`;
-          }
-          if (i === 1) {
-            return `${+b}`;
-          }
-          if (i === 2) {
-            return `${+b}`;
-          }
-          if (i === 3) {
-            return `${+b}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "balance-side";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "balance-side") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b - 9}`;
-          }
-          if (i === 1) {
-            return `${+b - 1}`;
-          }
-          if (i === 2) {
-            return `${+b - 1}`;
-          }
-          if (i === 3) {
-            return `${+b}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "balance-side-reverse";
-        return globalData.currentBlockArray;
-      }
-
-      if (globalData.currentBlockType === "balance-side-reverse") {
-        const blockArray = globalData.currentBlockArray.map((b, i) => {
-          if (i === 0) {
-            return `${+b}`;
-          }
-          if (i === 1) {
-            return `${+b}`;
-          }
-          if (i === 2) {
-            return `${+b}`;
-          }
-          if (i === 3) {
-            return `${+b - 9}`;
-          }
-        });
-        globalData.currentBlockArray = blockArray;
-        globalData.currentBlockType = "balance";
-        return globalData.currentBlockArray;
-      }
-    }
-
-    if (globalData.currentKeyPress === "ArrowDown") {
-      const BlockArray = globalData.currentBlockArray.map((b) => `${+b + 10}`);
-      globalData.currentBlockArray = BlockArray;
-
-      return globalData.currentBlockArray;
-    }
-  }
-
-  //  버그 발견
-  // 1. line에 색 꽉 안 찼는데 제거하는 경우
-  // 2. 제거한 블록 위에 있는 블록들이 안내려오는 경우
-  // 다시 한번 플레이 해보고 기록하기
-  // 그 후 버그 수정
-  // 다시해보니 버그 안생김
-
-  return globalData.currentBlockArray;
 }
 
 function canBlockMove(globalData) {
@@ -544,12 +143,6 @@ function canBlockMove(globalData) {
       return false;
     }
 
-    // if (data.canfutureBlockPainted()) {
-    //   globalData.currentBlockArray = data.futureBlockArray;
-    //   return true;
-    // }
-
-    // return false;
     return data.canfutureBlockPainted();
   }
 }
@@ -602,8 +195,14 @@ function blockSave(globalData) {
   function checkBlockIsStop(globalData) {
     if (!globalData.isBlockGoingDown) {
       clearInterval(setIntervalCheckBlockIsStop);
-
+      console.log(
+        `(전)최고 높이 blockLine height : ${globalData.maxHeightBlockLine}`
+      );
       const blockSaveData = new LastSavedBlockData(globalData);
+      console.log(
+        `(후)최고 높이 blockLine height : ${globalData.maxHeightBlockLine}`
+      );
+      console.log(blockSaveData);
       removefullColorLine(globalData, blockSaveData);
       moveAllBlockLineToBottom(globalData, blockSaveData);
       renderScore(globalData);
@@ -613,6 +212,7 @@ function blockSave(globalData) {
 
     function removefullColorLine(globalData, data) {
       const blockLineData = getBlockLineData(data);
+      console.log(blockLineData);
 
       removeBlockLineFullOfColor(globalData, blockLineData);
 
@@ -629,8 +229,8 @@ function blockSave(globalData) {
           if (blockLineData[i].isfull) {
             removeBlockLine(blockLineData[i].blockLineNumberArray);
 
-            console.log(globalData.removedBlockLine);
             globalData.removedBlockLine = blockLineData[i].blockLine;
+            console.log(globalData.removedBlockLine);
           }
         }
 

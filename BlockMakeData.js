@@ -11,12 +11,7 @@ export default class BlockMakeData {
   #isBlockTypeBlockLine;
   #isThereEmptySpace;
   #blockColor;
-  constructor(
-    globalData,
-    blockNumberArray
-    // MAX_HEIGHT_OF_GAME_MAP,
-    // CENTER_POSITION_NUMBER
-  ) {
+  constructor(globalData, blockNumberArray) {
     this.#globalData = globalData;
     this.#blockNumberArray = blockNumberArray ? blockNumberArray : null;
     this.#MAX_HEIGHT_OF_GAME_MAP = MAX_HEIGHT_OF_GAME_MAP;
@@ -206,7 +201,6 @@ export default class BlockMakeData {
   }
 
   checkIsThereEmptySpace() {
-    // if (!this.#blockNumberArray) return true;
     return !this.currentBlockNumberArray.some((b) => {
       const blockColor = window
         .getComputedStyle(
@@ -221,16 +215,13 @@ export default class BlockMakeData {
   getRandomColor() {
     const colorType = ["red", "blue", "green"];
     const randomNumber = Math.floor(Math.random() * colorType.length);
-    // const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
-    // const blockTypeNumber = randomNumber;
-    // this.#globalData.currentBlockType = colorType[randomNumber];
-    // console.log(randomNumber);
+
     if (this.#globalData.justMaked) {
       this.#globalData.currentBlockColor = colorType[randomNumber];
       this.#globalData.justMaked = false;
       return colorType[randomNumber];
     }
-    // return colorType[randomNumber];
+
     return this.#globalData.currentBlockColor;
   }
 }

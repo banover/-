@@ -12,11 +12,11 @@ export default class BlockLineData {
   constructor(globalData, data) {
     this.#globalData = globalData;
     this.#originalData = data;
-    // this.#removedBlockLine = this.#originalData.removedBlockLine;
+
     this.#removedBlockLine = this.#globalData.removedBlockLine;
 
     this.#numberOfBlockLineTodown = this.#removedBlockLine.length;
-    // this.#boundryToDown = Number(this.#removedBlockLine[0]) - 1;
+
     this.#boundryToDown = Number(this.#globalData.removedBlockLine[0]) - 1;
     this.#boundryToTop = this.#globalData.maxHeightBlockLine;
     this.#minRemovedBlockLine = Math.min(...this.#removedBlockLine);

@@ -45,10 +45,8 @@ export default class LastSavedBlockData {
   set removedBlockLine(value) {
     if (value === 0) {
       this.#globalData.removedBlockLine = value;
-      // this.removedBlockLine.length = 0;
     } else {
       this.#globalData.removedBlockLine = value;
-      // this.removedBlockLine.push(value);
     }
   }
 
@@ -58,12 +56,9 @@ export default class LastSavedBlockData {
       .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
       .filter((b) => b < this.GAME_MAP_HEIGHT);
 
-    // 130의 경우 12blockLine인데 13blockLine으로 처리됨...
-
     console.log([...new Set(blockLineArray)]);
 
     return [...new Set(blockLineArray)];
-    // 개선하자면 굳이 lastSavedBlockNumberArray를 다 map하기보다는 부분만 사용하겠금...
   }
 
   getMaxHeightBlockLine() {

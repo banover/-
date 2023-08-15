@@ -13,14 +13,11 @@ export default class BlockNumberArray {
   }
 
   makeNewBlockNumberArray() {
-    // if (globalData.currentBlockType === "blockLine" && canBlockMove(globalData)) {
     if (this.#globalData.currentBlockType === "blockLine") {
       return this.#globalData.currentBlockArray.map((b) => `${+b + 10}`);
     }
 
     if (this.canBlockMove()) {
-      // return globalData.currentBlockArray;
-      // if (globalData.currentBlockType === "squre" && canBlockMove(globalData)) {
       if (this.#globalData.currentKeyPress === "ArrowRight") {
         const BlockArray = this.#globalData.currentBlockArray.map(
           (b) => `${+b + 1}`
@@ -413,13 +410,6 @@ export default class BlockNumberArray {
         return this.#globalData.currentBlockArray;
       }
     }
-
-    //  버그 발견
-    // 1. line에 색 꽉 안 찼는데 제거하는 경우
-    // 2. 제거한 블록 위에 있는 블록들이 안내려오는 경우
-    // 다시 한번 플레이 해보고 기록하기
-    // 그 후 버그 수정
-    // 다시해보니 버그 안생김
 
     return this.#globalData.currentBlockArray;
   }

@@ -54,12 +54,10 @@ export default class BlockMoveData {
   makeFutureBlockArray() {
     if (this.#globalData.currentKeyPress === "ArrowLeft") {
       return this.#globalData.currentBlockArray.map((b) => +b - 1);
-      // .filter((b) => !this.#globalData.currentBlockArray.includes(`${b}`));
     }
 
     if (this.#globalData.currentKeyPress === "ArrowRight") {
       return this.#globalData.currentBlockArray.map((b) => +b + 1);
-      // .filter((b) => !this.#globalData.currentBlockArray.includes(`${b}`));
     }
 
     if (this.#globalData.currentKeyPress === "ArrowDown") {

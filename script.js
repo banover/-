@@ -27,9 +27,6 @@ const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
 const modal = document.querySelector(".tetris__gameOverModal");
 
-// 배열로 만들어 놨다가 추후에 random으로 currentBlockShape으로 값 넘겨주기
-const blockShape = ["squre"];
-
 function playGame() {
   // menu.style.visibility = "hidden";
   makeGameMap();
@@ -70,7 +67,7 @@ function gameStart() {
 
 function makeBlock(globalData, blockNumberArray) {
   const DataAboutMakeBlock = new BlockMakeData(globalData, blockNumberArray);
-  // console.log(DataAboutMakeBlock);
+
   paintBlocks(globalData, DataAboutMakeBlock);
 
   function paintBlocks(globalData, data) {
@@ -80,7 +77,7 @@ function makeBlock(globalData, blockNumberArray) {
     }
 
     if (!data.isThereEmptySpace) return gameOver(globalData);
-    // paintBlock(data, "red");
+
     paintBlock(data);
   }
 
@@ -99,7 +96,6 @@ function makeBlock(globalData, blockNumberArray) {
     globalData.gameRunning = false;
   }
 
-  // function paintBlock(data, color) {
   function paintBlock(data) {
     data.currentBlockNumberArray.map((item) => {
       const miniBlock = document.querySelector(
@@ -113,12 +109,10 @@ function makeBlock(globalData, blockNumberArray) {
 function moveBlock(globalData) {
   removeCurrentBlock(globalData);
   const newBlockNumberArrayData = new BlockNumberArray(globalData);
-  // makeBlock(globalData, makeNewBlockNumberArray(globalData));
   makeBlock(globalData, newBlockNumberArrayData.blockNumberArray);
 }
 
 function removeCurrentBlock(globalData) {
-  console.log(globalData.currentBlockArray);
   globalData.currentBlockArray.map((b) => {
     const miniBlock = document.querySelector(
       `.tetris__gridItem[data-id="${b}"]`
@@ -212,7 +206,6 @@ function blockSave(globalData) {
 
     function removefullColorLine(globalData, data) {
       const blockLineData = getBlockLineData(data);
-      console.log(blockLineData);
 
       removeBlockLineFullOfColor(globalData, blockLineData);
 
@@ -230,7 +223,6 @@ function blockSave(globalData) {
             removeBlockLine(blockLineData[i].blockLineNumberArray);
 
             globalData.removedBlockLine = blockLineData[i].blockLine;
-            console.log(globalData.removedBlockLine);
           }
         }
 
@@ -246,12 +238,12 @@ function blockSave(globalData) {
 
     function moveAllBlockLineToBottom(globalData, data) {
       const inGameData = new BlockLineData(globalData, data);
-      console.log(inGameData);
+
       moveRemainBlockDown(globalData, inGameData);
 
       function moveRemainBlockDown(globalData, inGameData) {
         const enrichedData = new EnrichedBlockLineData(inGameData);
-        console.log(enrichedData);
+
         moveTargetBlockLineToDown(globalData, enrichedData);
 
         function moveTargetBlockLineToDown(globalData, enrichedData) {
@@ -288,9 +280,6 @@ function blockSave(globalData) {
     }
 
     function startNextBlock(globalData, data) {
-      // if (data.removedBlockLine.length) {
-      //   resetGameData(globalData, data);
-      // }
       resetGameData(globalData, data);
 
       makeBlock(globalData);
@@ -301,16 +290,14 @@ function blockSave(globalData) {
 
       function resetGameData(globalData, data) {
         globalData.currentBlockType = "";
-        // data.maxHeightBlockLine = data.removedBlockLine.length
+
         globalData.maxHeightBlockLine = data.removedBlockLine.length
           ? globalData.maxHeightBlockLine + data.removedBlockLine.length
-          : data.maxHeightBlockLine;
-        // data.maxHeightBlockLine =
-        //   data.maxHeightBlockLine + data.removedBlockLine.length;
+          : globalData.maxHeightBlockLine;
+        // : data.maxHeightBlockLine;
 
         globalData.removedBlockLine = 0;
         globalData.justMaked = true;
-        // data.removedBlockLine = 0;
       }
     }
   }

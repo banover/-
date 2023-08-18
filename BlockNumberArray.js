@@ -2,10 +2,18 @@ import BlockMoveData from "/BlockMoveData.js";
 
 export default class BlockNumberArray {
   #globalData;
+  #isPressedKeySpace;
   #newBlockNumberArray;
+  // #lastAvailableBlockNumberArray;
   constructor(globalData) {
     this.#globalData = globalData;
-    this.#newBlockNumberArray = this.makeNewBlockNumberArray();
+    this.#isPressedKeySpace = globalData.currentKeyPress === " ";
+    this.#newBlockNumberArray = this.#isPressedKeySpace
+      ? this.makeLastAvailableBlockNumerArray()
+      : this.makeNewBlockNumberArray();
+    // this.#lastAvailableBlockNumberArray = this.#isPressedKeySpace
+    //   ? this.makeLastAvailableBlockNumerArray()
+    //   : null;
   }
 
   get blockNumberArray() {
@@ -432,5 +440,20 @@ export default class BlockNumberArray {
     }
 
     return data.canfutureBlockPainted();
+  }
+
+  makeLastAvailableBlockNumerArray() {
+    this.#globalData.currentKeyPress = "ArrowDown";
+
+    while (true) {
+      const DataAboutMove = new BlockMoveData(this.#globalData);
+      if (!this.canFutureBlockExist(DataAboutMove)) {
+        break;
+      }
+      this.#globalData.currentBlockArray =
+        this.#globalData.currentBlockArray.map((b) => +b + 10);
+    }
+
+    return this.#globalData.currentBlockArray;
   }
 }

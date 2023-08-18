@@ -166,6 +166,7 @@ function moveBlockDownPerSecond(globalData) {
 function keyPressHandler(globalData) {
   window.addEventListener("keydown", (e) => {
     if (isArrowKeyPressed(globalData, e.key)) moveBlock(globalData);
+    if (isSpaceKeyPressed(globalData, e.key)) moveBlock(globalData);
 
     function isArrowKeyPressed(globalData, key) {
       globalData.currentKeyPress = key;
@@ -176,6 +177,12 @@ function keyPressHandler(globalData) {
         globalData.currentKeyPress === "ArrowUp" ||
         globalData.currentKeyPress === "ArrowDown"
       );
+    }
+
+    function isSpaceKeyPressed(globalData, key) {
+      globalData.currentKeyPress = key;
+
+      return globalData.currentKeyPress === " ";
     }
   });
 }

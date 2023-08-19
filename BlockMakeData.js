@@ -6,6 +6,7 @@ export default class BlockMakeData {
   #MAX_HEIGHT_OF_GAME_MAP;
   #CENTER_POSITION_NUMBER;
   #isFirstBlock;
+  #nextBlockType;
   #currentBlockType;
   #currentBlockNumberArray;
   #isBlockTypeBlockLine;
@@ -17,13 +18,21 @@ export default class BlockMakeData {
     this.#MAX_HEIGHT_OF_GAME_MAP = MAX_HEIGHT_OF_GAME_MAP;
     this.#CENTER_POSITION_NUMBER = CENTER_POSITION_NUMBER;
     this.#isFirstBlock =
-      this.#globalData.maxHeightBlockLine === this.#MAX_HEIGHT_OF_GAME_MAP
+      this.#globalData.maxHeightBlockLine === this.#MAX_HEIGHT_OF_GAME_MAP &&
+      this.#globalData.score === 0
         ? true
         : false;
 
-    this.#currentBlockType = this.#globalData.currentBlockType
-      ? globalData.currentBlockType
-      : this.getRandomBlockType();
+    this.#nextBlockType = this.#globalData.nextBlockType
+      ? [`${this.#globalData.nextBlockType}`]
+      : [`${this.getRandomBlockType()}`];
+
+    this.#currentBlockType = this.getBlockType();
+
+    // this.#currentBlockType = this.#globalData.currentBlockType
+    //   ? globalData.currentBlockType
+    //   : this.getRandomBlockType();
+
     this.#currentBlockNumberArray = this.#blockNumberArray
       ? this.setBlockNumberArray()
       : this.makeBlockNumberArray();
@@ -38,6 +47,13 @@ export default class BlockMakeData {
 
   get isFirstBlock() {
     return this.#isFirstBlock;
+  }
+  get nextBlockType() {
+    return this.#nextBlockType;
+    // return this.#globalData.nextBlockType;
+  }
+  set nextBlockType(value) {
+    this.#globalData.nextBlockType = this.getRandomBlockType();
   }
   get currentBlockType() {
     return this.#currentBlockType;
@@ -69,10 +85,32 @@ export default class BlockMakeData {
     const randomNumber = Math.floor(Math.random() * blockType.length);
     // const blockTypeNumber = randomNumber === 0 ? randomNumber : 0;
     const blockTypeNumber = randomNumber;
-    this.#globalData.currentBlockType = blockType[blockTypeNumber];
-    console.log(randomNumber);
+    // this.#globalData.currentBlockType = blockType[blockTypeNumber];
+    // console.log(randomNumber);
 
     return blockType[blockTypeNumber];
+  }
+
+  getBlockType() {
+    // const result =
+    if (this.#globalData.currentBlockType) {
+      console.log(this.#globalData.currentBlockType);
+      console.log("첫 if문");
+      return this.#globalData.currentBlockType;
+    } else if (this.nextBlockType.length && !this.isFirstBlock) {
+      console.log("두번쨰 if문");
+      this.#globalData.currentBlockType = this.nextBlockType[0];
+      this.nextBlockType = "remove first item and push a new random BlockType";
+      return this.#globalData.currentBlockType;
+    } else {
+      console.log("정상적으로 지나감");
+      const newBlockType = this.getRandomBlockType();
+      this.#globalData.nextBlockType = this.nextBlockType[0];
+      this.#globalData.currentBlockType = newBlockType;
+
+      // this.nextBlockType = "remove first item and push a new random BlockType";
+      return newBlockType;
+    }
   }
 
   setBlockNumberArray() {

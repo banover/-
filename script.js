@@ -9,6 +9,7 @@ import {
   CENTER_POSITION_NUMBER,
   DEFAULT_SCORE,
   SCORE_PER_ONE_LINE_BLOCK,
+  NEXT_BLOCK_CENTER_POSITION_NUMBER,
 } from "./config.js";
 import GlobalData from "./GlobalData.js";
 import BlockMakeData from "./BlockMakeData.js";
@@ -22,7 +23,7 @@ import BlockNumberArray from "./BlockNumberArray.js";
 const menu = document.querySelector(".tetris__menu");
 const playingBtn = document.querySelector(".tetris__playingBtn");
 const checkBtn = document.querySelector(".tetris__checkBtn");
-const nextItemBox = document.querySelector(".tetris__nextItemBox");
+const nextItem = document.querySelector(".tetris__nextItem");
 const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
 const modal = document.querySelector(".tetris__gameOverModal");
@@ -30,6 +31,7 @@ const modal = document.querySelector(".tetris__gameOverModal");
 function playGame() {
   // menu.style.visibility = "hidden";
   makeGameMap();
+  makeNextItem();
   gameStart();
 }
 
@@ -56,10 +58,26 @@ function makeGameMap() {
   }
 }
 
+function makeNextItem() {
+  for (let i = 0; i < 8; i++) {
+    const gridItem = makeNextGridItem(i);
+    nextItem.append(gridItem);
+  }
+
+  function makeNextGridItem(i) {
+    const gridCell = document.createElement("div");
+    gridCell.classList.add("tetris__nextGridItem");
+    gridCell.setAttribute("data-id", i + 1);
+
+    return gridCell;
+  }
+}
+
 function gameStart() {
   const globalData = new GlobalData();
 
   makeBlock(globalData);
+  makeNextBlock(globalData);
   moveBlockDownPerSecond(globalData);
   keyPressHandler(globalData);
   blockSave(globalData);
@@ -67,6 +85,7 @@ function gameStart() {
 
 function makeBlock(globalData, blockNumberArray) {
   const DataAboutMakeBlock = new BlockMakeData(globalData, blockNumberArray);
+  console.log(DataAboutMakeBlock);
 
   paintBlocks(globalData, DataAboutMakeBlock);
 
@@ -138,6 +157,98 @@ function canBlockMove(globalData) {
     }
 
     return data.canfutureBlockPainted();
+  }
+}
+
+function makeNextBlock(globalData) {
+  // nextItem
+  console.log(globalData);
+  const nextBlockTypeNumberArray = getNextBlockTypeNumberArray(globalData);
+  paintNextBlockItem(nextBlockTypeNumberArray);
+
+  function getNextBlockTypeNumberArray(globalData) {
+    if (globalData.nextBlockType === null) return null;
+    if (globalData.nextBlockType === "squre") return makeSqureNumberArray();
+    if (globalData.nextBlockType === "bar") return makeBarNumberArray();
+    if (globalData.nextBlockType === "z") return makeZNumberArray();
+    if (globalData.nextBlockType === "z-reverse")
+      return makeZreverseNumberArray();
+
+    if (globalData.nextBlockType === "gun") return makeGunNumberArray();
+    if (globalData.nextBlockType === "gun-reverse")
+      return makeGunReverseNumberArray();
+    if (globalData.nextBlockType === "balance") return makeBalanceNumberArray();
+  }
+
+  function makeSqureNumberArray() {
+    return [
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 4}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 5}`,
+    ];
+  }
+
+  function makeBarNumberArray() {
+    return [
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER - 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 2}`,
+    ];
+  }
+
+  function makeZNumberArray() {
+    return [
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER - 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 4}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 5}`,
+    ];
+  }
+
+  function makeZreverseNumberArray() {
+    return [
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 3}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 4}`,
+    ];
+  }
+  function makeGunNumberArray() {
+    return [
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER - 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 5}`,
+    ];
+  }
+
+  function makeGunReverseNumberArray() {
+    return [
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER - 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 3}`,
+    ];
+  }
+
+  function makeBalanceNumberArray() {
+    return [
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 3}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 4}`,
+      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 5}`,
+    ];
+  }
+
+  function paintNextBlockItem(nextBlockTypeNumberArray) {
+    nextBlockTypeNumberArray.map((item) => {
+      const miniBlock = document.querySelector(
+        `.tetris__nextGridItem[data-id="${item}"]`
+      );
+      miniBlock.style.backgroundColor = `white`;
+    });
   }
 }
 
@@ -290,6 +401,7 @@ function blockSave(globalData) {
       resetGameData(globalData, data);
 
       makeBlock(globalData);
+      makeNextBlock(globalData);
       if (globalData.gameRunning) {
         moveBlockDownPerSecond(globalData);
         blockSave(globalData);
@@ -305,6 +417,18 @@ function blockSave(globalData) {
 
         globalData.removedBlockLine = 0;
         globalData.justMaked = true;
+
+        clearNextGridItem();
+
+        function clearNextGridItem() {
+          const AllNextGridItem = document.querySelectorAll(
+            ".tetris__nextGridItem"
+          );
+
+          AllNextGridItem.forEach((curruntValue) => {
+            curruntValue.style.backgroundColor = "black";
+          });
+        }
       }
     }
   }

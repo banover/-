@@ -17,18 +17,25 @@ body {
   width: 70rem;
   height: 60rem;
 
-  position: absolute;
+  /* position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); */
+  margin: 5rem auto;
+
+  /* display: flex;
+  flex-direction: column; */
   /* z-index: 999; */
+  position: relative;
 }
 
 .tetris__menu {
+  width: 100%;
   /* z-index: 99; */
 }
 
 .tetris__upperBanner {
+  width: 100%;
   display: flex;
   align-items: center;
   color: white;
@@ -59,13 +66,13 @@ body {
   border-bottom: 1px solid white;
   border-right: 1px solid white; */
 
-  position: relative;
-  /* top: 50%;
+  position: absolute;
+  top: 55%;
   left: 50%;
-  transform: translate(-50%, -50%); */
-  top: 5%;
+  transform: translate(-50%, -50%);
+  /* top: 5%;
   left: 50%;
-  transform: translate(-50%, 0);
+  transform: translate(-50%, 0); */
 
   display: grid;
   grid-template-columns: repeat(10, 1fr);
@@ -89,6 +96,41 @@ body {
   height: auto;
   font-size: 2rem;
   color: white;
+}
+
+.tetris__nextItemBox {
+  display: block;
+  width: 10rem;
+  height: 10rem;
+  /* z-index: 99; */
+  margin-top: 6.5rem;
+  margin-left: 5rem;
+
+  /* background-color: yellowgreen; */
+  /* clip-path: polygon(); */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tetris__nextItem {
+  width: 8rem;
+  height: 4rem;
+  /* background-color: yellow; */
+  display: grid;
+  grid-template-columns: repeat(4, 2rem);
+  grid-template-rows: repeat(2, 2rem);
+  margin: 0 auto;
+}
+
+.tetris__nextGridItem {
+  width: 2rem;
+  height: 2rem;
+
+  background-color: black;
+  /* border: 0.1px inset rgba(0, 0, 0, 0.5); */
+  border: 0.1px solid rgba(0, 0, 0, 0.5);
+  /* z-index: 99; */
 }
 
 .tetris__gameOverModal {

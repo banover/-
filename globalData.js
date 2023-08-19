@@ -14,6 +14,7 @@ export default class GlobalData {
   #gameRunning;
   #justMaked;
   #currentBlockColor;
+  #nextBlockType;
 
   constructor() {
     this.#currentBlockArray = null;
@@ -29,6 +30,7 @@ export default class GlobalData {
     this.#gameRunning = true;
     this.#justMaked = true;
     this.#currentBlockColor = null;
+    this.#nextBlockType = null;
   }
 
   get currentBlockArray() {
@@ -136,5 +138,11 @@ export default class GlobalData {
 
   set currentBlockColor(value) {
     this.#currentBlockColor = value;
+  }
+  get nextBlockType() {
+    return this.#nextBlockType;
+  }
+  set nextBlockType(value) {
+    this.#nextBlockType = value;
   }
 }

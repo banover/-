@@ -175,11 +175,25 @@ function makeNextBlock(globalData) {
 
 function moveBlockDownPerSecond(globalData) {
   globalData.isBlockGoingDown = true;
+  const intervalmillisecond = getMoveBlockDownSecond(globalData);
+  console.log(intervalmillisecond);
 
   const setIntervalMoveBlockDown = setInterval(
     moveBlockDown.bind(null, globalData),
-    1000
+    intervalmillisecond
   );
+
+  function getMoveBlockDownSecond(globalData) {
+    if (globalData.score > 5 && globalData.score < 10) {
+      return 900;
+    } else if (globalData.score > 10 && globalData.score < 20) {
+      return 600;
+    } else if (globalData.score > 20) {
+      return 300;
+    }
+
+    return 1000;
+  }
 
   function moveBlockDown(globalData) {
     globalData.currentKeyPress = "ArrowDown";
@@ -197,6 +211,7 @@ function moveBlockDownPerSecond(globalData) {
 
 function keyPressHandler(globalData) {
   window.addEventListener("keydown", (e) => {
+    if (!globalData.gameRunning) return;
     if (isArrowKeyPressed(globalData, e.key)) moveBlock(globalData);
     if (isSpaceKeyPressed(globalData, e.key)) moveBlock(globalData);
 

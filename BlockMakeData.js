@@ -116,6 +116,8 @@ export default class BlockMakeData {
   }
 
   makeBlockNumberArray() {
+    if (this.currentBlockType === "blockLine")
+      return this.#globalData.currentBlockArray;
     if (this.currentBlockType === "squre") return this.makeSqureNumberArray();
     if (this.currentBlockType === "bar") return this.makeBarNumberArray();
     if (this.currentBlockType === "z") return this.makeZNumberArray();

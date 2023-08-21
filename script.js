@@ -176,7 +176,7 @@ function makeNextBlock(globalData) {
 function moveBlockDownPerSecond(globalData) {
   globalData.isBlockGoingDown = true;
   const intervalmillisecond = getMoveBlockDownSecond(globalData);
-  console.log(intervalmillisecond);
+  // console.log(intervalmillisecond);
 
   const setIntervalMoveBlockDown = setInterval(
     moveBlockDown.bind(null, globalData),

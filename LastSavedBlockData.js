@@ -12,6 +12,7 @@ export default class LastSavedBlockData {
     this.GAME_MAP_HEIGHT = GAME_MAP_HEIGHT;
 
     this.#lastSavedBlockLines = this.getBlockLinesOfLastSavedBlock();
+    console.log(this.#lastSavedBlockLines);
     this.#smallestBlockLine = Math.min(...this.#lastSavedBlockLines);
     this.#maxHeightBlockLine = this.getMaxHeightBlockLine();
 

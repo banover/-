@@ -431,7 +431,6 @@ export default class BlockNumberArray {
   }
 
   canFutureBlockExist(data) {
-    console.log(data.isFutureBlockOverGameMap);
     if (
       this.#globalData.currentBlockType !== "blockLine" &&
       data.isFutureBlockOverGameMap

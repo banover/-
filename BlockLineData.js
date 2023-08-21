@@ -17,10 +17,16 @@ export default class BlockLineData {
 
     this.#numberOfBlockLineTodown = this.#removedBlockLine.length;
 
-    this.#boundryToDown = Number(this.#globalData.removedBlockLine[0]) - 1;
+    this.#boundryToDown =
+      this.#globalData.removedBlockLine.length > 0
+        ? Math.min(...this.#globalData.removedBlockLine) - 1
+        : null;
+    // this.#boundryToDown = Number(this.#globalData.removedBlockLine[0]) - 1;
+
     this.#boundryToTop = this.#globalData.maxHeightBlockLine;
     this.#minRemovedBlockLine = Math.min(...this.#removedBlockLine);
     this.#numberOfBlockLine = this.#boundryToDown - this.#boundryToTop + 1;
+
     this.#isRemainBlockGoDown = this.isRemainBlockGoDown();
     this.#isBlockLineRemoved = this.isBlockLineRemoved();
   }

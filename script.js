@@ -19,6 +19,7 @@ import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
 import BlockLineData from "./BlockLineData.js";
 import BlockLineDataForRemove from "./BlockLineDataForRemove.js";
 import BlockNumberArray from "./BlockNumberArray.js";
+import NextBlockTypeData from "./NextBlockTypeData.js";
 
 const menu = document.querySelector(".tetris__menu");
 const playingBtn = document.querySelector(".tetris__playingBtn");
@@ -85,13 +86,11 @@ function gameStart() {
 
 function makeBlock(globalData, blockNumberArray) {
   const DataAboutMakeBlock = new BlockMakeData(globalData, blockNumberArray);
-  console.log(DataAboutMakeBlock);
 
   paintBlocks(globalData, DataAboutMakeBlock);
 
   function paintBlocks(globalData, data) {
     if (data.isBlockTypeBlockLine) {
-      console.log(data.currentBlockNumberArray);
       return paintBlockLine(globalData, data.currentBlockNumberArray);
     }
 
@@ -148,7 +147,6 @@ function canBlockMove(globalData) {
   return false;
 
   function canFutureBlockExist(globalData, data) {
-    console.log(data.isFutureBlockOverGameMap);
     if (
       globalData.currentBlockType !== "blockLine" &&
       data.isFutureBlockOverGameMap
@@ -161,86 +159,9 @@ function canBlockMove(globalData) {
 }
 
 function makeNextBlock(globalData) {
-  // nextItem
-  console.log(globalData);
-  const nextBlockTypeNumberArray = getNextBlockTypeNumberArray(globalData);
+  const nextBlockTypeNumberArray = new NextBlockTypeData(globalData)
+    .nextBlockTypeNumberArray;
   paintNextBlockItem(nextBlockTypeNumberArray);
-
-  function getNextBlockTypeNumberArray(globalData) {
-    if (globalData.nextBlockType === null) return null;
-    if (globalData.nextBlockType === "squre") return makeSqureNumberArray();
-    if (globalData.nextBlockType === "bar") return makeBarNumberArray();
-    if (globalData.nextBlockType === "z") return makeZNumberArray();
-    if (globalData.nextBlockType === "z-reverse")
-      return makeZreverseNumberArray();
-
-    if (globalData.nextBlockType === "gun") return makeGunNumberArray();
-    if (globalData.nextBlockType === "gun-reverse")
-      return makeGunReverseNumberArray();
-    if (globalData.nextBlockType === "balance") return makeBalanceNumberArray();
-  }
-
-  function makeSqureNumberArray() {
-    return [
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 4}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 5}`,
-    ];
-  }
-
-  function makeBarNumberArray() {
-    return [
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER - 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 2}`,
-    ];
-  }
-
-  function makeZNumberArray() {
-    return [
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER - 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 4}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 5}`,
-    ];
-  }
-
-  function makeZreverseNumberArray() {
-    return [
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 3}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 4}`,
-    ];
-  }
-  function makeGunNumberArray() {
-    return [
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER - 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 5}`,
-    ];
-  }
-
-  function makeGunReverseNumberArray() {
-    return [
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER - 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 1}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 3}`,
-    ];
-  }
-
-  function makeBalanceNumberArray() {
-    return [
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 3}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 4}`,
-      `${NEXT_BLOCK_CENTER_POSITION_NUMBER + 5}`,
-    ];
-  }
 
   function paintNextBlockItem(nextBlockTypeNumberArray) {
     nextBlockTypeNumberArray.map((item) => {
@@ -298,29 +219,27 @@ function keyPressHandler(globalData) {
   });
 }
 
+// 마지막으로 블락이 바닥에 놓이고 다음 블록이 나올 때 까지의 시간을 일정하게 해보자, 지금은 조금 덜일정함
+
 function blockSave(globalData) {
   const setIntervalCheckBlockIsStop = setInterval(
     checkBlockIsStop.bind(null, globalData),
-    500
+    50
   );
 
   function checkBlockIsStop(globalData) {
-    if (!globalData.isBlockGoingDown) {
-      clearInterval(setIntervalCheckBlockIsStop);
-      console.log(
-        `(전)최고 높이 blockLine height : ${globalData.maxHeightBlockLine}`
-      );
-      const blockSaveData = new LastSavedBlockData(globalData);
-      console.log(
-        `(후)최고 높이 blockLine height : ${globalData.maxHeightBlockLine}`
-      );
-      console.log(blockSaveData);
-      removefullColorLine(globalData, blockSaveData);
-      moveAllBlockLineToBottom(globalData, blockSaveData);
-      renderScore(globalData);
-      startNextBlock(globalData, blockSaveData);
-      // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
-    }
+    if (globalData.isBlockGoingDown) return;
+    // if (!globalData.isBlockGoingDown) {
+    clearInterval(setIntervalCheckBlockIsStop);
+
+    const blockSaveData = new LastSavedBlockData(globalData);
+
+    removefullColorLine(globalData, blockSaveData);
+    moveAllBlockLineToBottom(globalData, blockSaveData);
+    renderScore(globalData);
+    startNextBlock(globalData, blockSaveData);
+    // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
+    // }
 
     function removefullColorLine(globalData, data) {
       const blockLineData = getBlockLineData(data);

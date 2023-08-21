@@ -94,16 +94,12 @@ export default class BlockMakeData {
   getBlockType() {
     // const result =
     if (this.#globalData.currentBlockType) {
-      console.log(this.#globalData.currentBlockType);
-      console.log("첫 if문");
       return this.#globalData.currentBlockType;
     } else if (this.nextBlockType.length && !this.isFirstBlock) {
-      console.log("두번쨰 if문");
       this.#globalData.currentBlockType = this.nextBlockType[0];
       this.nextBlockType = "remove first item and push a new random BlockType";
       return this.#globalData.currentBlockType;
     } else {
-      console.log("정상적으로 지나감");
       const newBlockType = this.getRandomBlockType();
       this.#globalData.nextBlockType = this.nextBlockType[0];
       this.#globalData.currentBlockType = newBlockType;

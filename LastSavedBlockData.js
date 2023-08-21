@@ -56,16 +56,12 @@ export default class LastSavedBlockData {
       .map((b) => (b / 10 === 0 ? 0 : Math.floor(b / 10)))
       .filter((b) => b < this.GAME_MAP_HEIGHT);
 
-    console.log([...new Set(blockLineArray)]);
-
     return [...new Set(blockLineArray)];
   }
 
   getMaxHeightBlockLine() {
     if (this.smallestBlockLine < this.#globalData.maxHeightBlockLine) {
       this.#globalData.maxHeightBlockLine = this.smallestBlockLine;
-      console.log(`smallestBlockLine: ${this.smallestBlockLine}`);
-      console.log(`maxHeightBlockLine: ${this.#globalData.maxHeightBlockLine}`);
     }
     return this.#globalData.maxHeightBlockLine;
   }

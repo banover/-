@@ -152,3 +152,39 @@ body {
 
   display: none;
 }
+
+.tetris__record {
+  width: 100%;
+  height: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgb(255, 255, 255, 0.3);
+  /* z-index: 999; */
+
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+
+  padding-top: 12rem;
+  display: none;
+}
+
+.tetris__record h3 {
+  font-size: 6rem;
+  /* text-align: center; */
+}
+
+.tetris__recordLists {
+  list-style-position: inside;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.tetris__recordLists li {
+  font-size: 3rem;
+}

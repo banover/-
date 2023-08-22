@@ -28,6 +28,8 @@ const nextItem = document.querySelector(".tetris__nextItem");
 const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
 const modal = document.querySelector(".tetris__gameOverModal");
+const recodePage = document.querySelector(".tetris__record");
+const recode = document.querySelector(".tetris__recordLists");
 
 function playGame() {
   // menu.style.visibility = "hidden";
@@ -112,6 +114,34 @@ function makeBlock(globalData, blockNumberArray) {
     modal.style.display = "block";
     menu.style.visibility = "visible";
     globalData.gameRunning = false;
+    // record 기록
+    // recode
+    // 기록을 불러와서 점수 체크 후에, 순위를 알아보고 제대로 된 위치에 추가하기
+    const savedRecord = JSON.parse(localStorage.getItem("score"));
+    if (savedRecord) {
+      savedRecord.push(globalData.score);
+      savedRecord.sort((a, b) => b - a);
+      const topRecord = savedRecord.slice(0, 5);
+      localStorage.setItem("score", JSON.stringify(topRecord));
+
+      recode.textContent = "";
+      for (let i = 0; i < topRecord.length; i++) {
+        const recordList = document.createElement("li");
+        recordList.textContent = topRecord[i];
+        if (Number(topRecord[i]) === globalData.score) {
+          recordList.style.color = "red";
+        }
+        recode.append(recordList);
+      }
+      recodePage.style.display = "flex";
+      modal.style.display = "none";
+      playingBox.style.display = "none";
+      nextItem.style.display = "none";
+    } else {
+      localStorage.setItem("score", JSON.stringify([globalData.score]));
+    }
+
+    console.log(JSON.parse(localStorage.getItem("score")));
   }
 
   function paintBlock(data) {

@@ -20,6 +20,7 @@ import BlockLineData from "./BlockLineData.js";
 import BlockLineDataForRemove from "./BlockLineDataForRemove.js";
 import BlockNumberArray from "./BlockNumberArray.js";
 import NextBlockTypeData from "./NextBlockTypeData.js";
+import RecordData from "./RecordData.js";
 
 const menu = document.querySelector(".tetris__menu");
 const playingBtn = document.querySelector(".tetris__playingBtn");
@@ -33,6 +34,16 @@ const recode = document.querySelector(".tetris__recordLists");
 
 function playGame() {
   // menu.style.visibility = "hidden";
+
+  if (playingBtn.textContent === "다시하기") {
+    location.reload();
+
+    makeGameMap();
+    makeNextItem();
+    gameStart();
+  }
+  playingBtn.textContent = "다시하기";
+
   makeGameMap();
   makeNextItem();
   gameStart();
@@ -45,6 +56,7 @@ playingBtn.addEventListener("click", playGame);
 // **********************************************************************
 
 function makeGameMap() {
+  playingBox.textContent = "";
   for (let i = 0; i < GAME_MAP_HEIGHT * 10; i++) {
     const gridItem = makeGridItem(i);
     playingBox.append(gridItem);
@@ -62,6 +74,7 @@ function makeGameMap() {
 }
 
 function makeNextItem() {
+  nextItem.textContent = "";
   for (let i = 0; i < 8; i++) {
     const gridItem = makeNextGridItem(i);
     nextItem.append(gridItem);
@@ -78,7 +91,6 @@ function makeNextItem() {
 
 function gameStart() {
   const globalData = new GlobalData();
-
   makeBlock(globalData);
   makeNextBlock(globalData);
   moveBlockDownPerSecond(globalData);
@@ -114,34 +126,49 @@ function makeBlock(globalData, blockNumberArray) {
     modal.style.display = "block";
     menu.style.visibility = "visible";
     globalData.gameRunning = false;
+    // window.removeEventListener("keydown", handleGameKeyPad);
+    manageRecord(globalData);
     // record 기록
     // recode
     // 기록을 불러와서 점수 체크 후에, 순위를 알아보고 제대로 된 위치에 추가하기
-    const savedRecord = JSON.parse(localStorage.getItem("score"));
-    if (savedRecord) {
-      savedRecord.push(globalData.score);
-      savedRecord.sort((a, b) => b - a);
-      const topRecord = savedRecord.slice(0, 5);
-      localStorage.setItem("score", JSON.stringify(topRecord));
 
-      recode.textContent = "";
-      for (let i = 0; i < topRecord.length; i++) {
-        const recordList = document.createElement("li");
-        recordList.textContent = topRecord[i];
-        if (Number(topRecord[i]) === globalData.score) {
-          recordList.style.color = "red";
-        }
-        recode.append(recordList);
-      }
-      recodePage.style.display = "flex";
-      modal.style.display = "none";
-      playingBox.style.display = "none";
-      nextItem.style.display = "none";
-    } else {
-      localStorage.setItem("score", JSON.stringify([globalData.score]));
+    function manageRecord(globalData) {
+      const recordData = new RecordData(globalData);
+      showRecord(recordData);
     }
 
-    console.log(JSON.parse(localStorage.getItem("score")));
+    function showRecord(recordData) {
+      // recode.textContent = "";
+      // for (let i = 0; i < recordData.updatedRecord.length; i++) {
+      //   const recordList = document.createElement("li");
+      //   recordList.textContent = recordData.updatedRecord[i];
+      //   if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
+      //     recordList.style.color = "red";
+      //   }
+      //   recode.append(recordList);
+      // }
+      makeHtmlRecord(recordData);
+      updateUI();
+
+      function makeHtmlRecord(recordData) {
+        recode.textContent = "";
+        for (let i = 0; i < recordData.updatedRecord.length; i++) {
+          const recordList = document.createElement("li");
+          recordList.textContent = recordData.updatedRecord[i];
+          if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
+            recordList.style.color = "red";
+          }
+          recode.append(recordList);
+        }
+      }
+
+      function updateUI() {
+        recodePage.style.display = "flex";
+        modal.style.display = "none";
+        playingBox.style.display = "none";
+        nextItem.style.display = "none";
+      }
+    }
   }
 
   function paintBlock(data) {
@@ -240,28 +267,56 @@ function moveBlockDownPerSecond(globalData) {
 }
 
 function keyPressHandler(globalData) {
-  window.addEventListener("keydown", (e) => {
+  window.addEventListener(
+    "keydown",
+    handleGameKeyPad.bind(null, globalData)
+
+    // function handleGameKeyPad(e, globalData) {
+    //   if (!globalData.gameRunning) return;
+    //   if (isArrowKeyPressed(globalData, e.key)) moveBlock(globalData);
+    //   if (isSpaceKeyPressed(globalData, e.key)) moveBlock(globalData);
+    // }
+
+    // function isArrowKeyPressed(globalData, key) {
+    //   globalData.currentKeyPress = key;
+
+    //   return (
+    //     globalData.currentKeyPress === "ArrowRight" ||
+    //     globalData.currentKeyPress === "ArrowLeft" ||
+    //     globalData.currentKeyPress === "ArrowUp" ||
+    //     globalData.currentKeyPress === "ArrowDown"
+    //   );
+    // }
+
+    // function isSpaceKeyPressed(globalData, key) {
+    //   globalData.currentKeyPress = key;
+
+    //   return globalData.currentKeyPress === " ";
+    // }
+    // }
+  );
+  function handleGameKeyPad(globalData, e) {
     if (!globalData.gameRunning) return;
     if (isArrowKeyPressed(globalData, e.key)) moveBlock(globalData);
     if (isSpaceKeyPressed(globalData, e.key)) moveBlock(globalData);
+  }
 
-    function isArrowKeyPressed(globalData, key) {
-      globalData.currentKeyPress = key;
+  function isArrowKeyPressed(globalData, key) {
+    globalData.currentKeyPress = key;
 
-      return (
-        globalData.currentKeyPress === "ArrowRight" ||
-        globalData.currentKeyPress === "ArrowLeft" ||
-        globalData.currentKeyPress === "ArrowUp" ||
-        globalData.currentKeyPress === "ArrowDown"
-      );
-    }
+    return (
+      globalData.currentKeyPress === "ArrowRight" ||
+      globalData.currentKeyPress === "ArrowLeft" ||
+      globalData.currentKeyPress === "ArrowUp" ||
+      globalData.currentKeyPress === "ArrowDown"
+    );
+  }
 
-    function isSpaceKeyPressed(globalData, key) {
-      globalData.currentKeyPress = key;
+  function isSpaceKeyPressed(globalData, key) {
+    globalData.currentKeyPress = key;
 
-      return globalData.currentKeyPress === " ";
-    }
-  });
+    return globalData.currentKeyPress === " ";
+  }
 }
 
 // 마지막으로 블락이 바닥에 놓이고 다음 블록이 나올 때 까지의 시간을 일정하게 해보자, 지금은 조금 덜일정함

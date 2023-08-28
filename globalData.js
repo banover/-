@@ -15,6 +15,7 @@ export default class GlobalData {
   #justMaked;
   #currentBlockColor;
   #nextBlockType;
+  #reset;
 
   constructor() {
     this.#currentBlockArray = null;
@@ -31,6 +32,7 @@ export default class GlobalData {
     this.#justMaked = true;
     this.#currentBlockColor = null;
     this.#nextBlockType = null;
+    this.#reset = false;
   }
 
   get currentBlockArray() {
@@ -144,5 +146,27 @@ export default class GlobalData {
   }
   set nextBlockType(value) {
     this.#nextBlockType = value;
+  }
+
+  get reset() {
+    this.#reset = value;
+  }
+  set reset(value) {
+    this.#reset = value;
+    this.#currentBlockArray = null;
+    this.#currentBlockType = null;
+    this.#currentKeyPress = null;
+    this.#lastSavedBlockNumberArray = null;
+    this.#lastSavedBlockLine = null;
+    this.#maxHeightBlockLine = MAX_HEIGHT_OF_GAME_MAP;
+    this.#removedBlockLine = [];
+    this.#blockColorArray = null;
+    this.#isBlockGoingDown = null;
+    this.#score = DEFAULT_SCORE;
+    this.#gameRunning = false;
+    this.#justMaked = true;
+    this.#currentBlockColor = null;
+    this.#nextBlockType = null;
+    // this.#reset = false;
   }
 }

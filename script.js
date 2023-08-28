@@ -35,15 +35,6 @@ const recode = document.querySelector(".tetris__recordLists");
 function playGame() {
   // menu.style.visibility = "hidden";
 
-  if (playingBtn.textContent === "다시하기") {
-    location.reload();
-
-    makeGameMap();
-    makeNextItem();
-    gameStart();
-  }
-  playingBtn.textContent = "다시하기";
-
   makeGameMap();
   makeNextItem();
   gameStart();
@@ -91,11 +82,31 @@ function makeNextItem() {
 
 function gameStart() {
   const globalData = new GlobalData();
+  resetGameHandler(globalData);
   makeBlock(globalData);
   makeNextBlock(globalData);
   moveBlockDownPerSecond(globalData);
   keyPressHandler(globalData);
   blockSave(globalData);
+}
+
+function resetGameHandler(globalData) {
+  if ((playingBtn.textContent = "시작")) {
+    playingBtn.removeEventListener("click", playGame);
+    playingBtn.textContent = "다시하기";
+  }
+  playingBtn.addEventListener("click", gameReset);
+
+  function gameReset() {
+    playingBtn.removeEventListener("click", gameReset);
+    globalData.reset = true;
+
+    recodePage.style.display = "none";
+    nextItem.style.display = "grid";
+    playingBox.style.display = "grid";
+    scoreBox.textContent = `점수: ${globalData.score}`;
+    playGame();
+  }
 }
 
 function makeBlock(globalData, blockNumberArray) {
@@ -125,12 +136,8 @@ function makeBlock(globalData, blockNumberArray) {
   function gameOver(globalData) {
     modal.style.display = "block";
     menu.style.visibility = "visible";
-    globalData.gameRunning = false;
-    // window.removeEventListener("keydown", handleGameKeyPad);
     manageRecord(globalData);
-    // record 기록
-    // recode
-    // 기록을 불러와서 점수 체크 후에, 순위를 알아보고 제대로 된 위치에 추가하기
+    globalData.reset = true;
 
     function manageRecord(globalData) {
       const recordData = new RecordData(globalData);
@@ -138,15 +145,6 @@ function makeBlock(globalData, blockNumberArray) {
     }
 
     function showRecord(recordData) {
-      // recode.textContent = "";
-      // for (let i = 0; i < recordData.updatedRecord.length; i++) {
-      //   const recordList = document.createElement("li");
-      //   recordList.textContent = recordData.updatedRecord[i];
-      //   if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
-      //     recordList.style.color = "red";
-      //   }
-      //   recode.append(recordList);
-      // }
       makeHtmlRecord(recordData);
       updateUI();
 
@@ -253,6 +251,11 @@ function moveBlockDownPerSecond(globalData) {
   }
 
   function moveBlockDown(globalData) {
+    console.log(globalData.gameRunning);
+    if (globalData.gameRunning === false) {
+      clearInterval(setIntervalMoveBlockDown);
+      return;
+    }
     globalData.currentKeyPress = "ArrowDown";
 
     canBlockMove(globalData)
@@ -296,7 +299,11 @@ function keyPressHandler(globalData) {
     // }
   );
   function handleGameKeyPad(globalData, e) {
-    if (!globalData.gameRunning) return;
+    // if (!globalData.gameRunning) return;
+    if (!globalData.gameRunning) {
+      window.removeEventListener("keydown", handleGameKeyPad);
+      return;
+    }
     if (isArrowKeyPressed(globalData, e.key)) moveBlock(globalData);
     if (isSpaceKeyPressed(globalData, e.key)) moveBlock(globalData);
   }
@@ -328,6 +335,11 @@ function blockSave(globalData) {
   );
 
   function checkBlockIsStop(globalData) {
+    console.log(globalData.gameRunning);
+    if (globalData.gameRunning === "false") {
+      clearInterval(setIntervalCheckBlockIsStop);
+      return;
+    }
     if (globalData.isBlockGoingDown) return;
     // if (!globalData.isBlockGoingDown) {
     clearInterval(setIntervalCheckBlockIsStop);

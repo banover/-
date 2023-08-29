@@ -83,6 +83,7 @@ function makeNextItem() {
 function gameStart() {
   const globalData = new GlobalData();
   resetGameHandler(globalData);
+  checkRecordHandler(globalData);
   makeBlock(globalData);
   makeNextBlock(globalData);
   moveBlockDownPerSecond(globalData);
@@ -106,6 +107,28 @@ function resetGameHandler(globalData) {
     playingBox.style.display = "grid";
     scoreBox.textContent = `점수: ${globalData.score}`;
     playGame();
+  }
+}
+
+function checkRecordHandler(globalData) {
+  checkBtn.addEventListener("click", showRecord.bind(null, globalData));
+
+  function showRecord(globalData) {
+    if (globalData.gameRunning === false) return;
+    if (checkBtn.textContent === "돌아가기") {
+      checkBtn.textContent = "기록확인";
+      recodePage.style.display = "none";
+      nextItem.style.display = "grid";
+      playingBox.style.display = "grid";
+      globalData.pause = false;
+
+      return;
+    }
+
+    checkBtn.textContent = "돌아가기";
+    globalData.pause = true;
+
+    manageRecord(globalData);
   }
 }
 
@@ -136,37 +159,38 @@ function makeBlock(globalData, blockNumberArray) {
   function gameOver(globalData) {
     modal.style.display = "block";
     menu.style.visibility = "visible";
+    console.log("game이 over했당!");
     manageRecord(globalData);
     globalData.reset = true;
 
-    function manageRecord(globalData) {
-      const recordData = new RecordData(globalData);
-      showRecord(recordData);
-    }
+    // function manageRecord(globalData) {
+    //   const recordData = new RecordData(globalData);
+    //   showRecord(recordData);
+    // }
 
-    function showRecord(recordData) {
-      makeHtmlRecord(recordData);
-      updateUI();
+    // function showRecord(recordData) {
+    //   makeHtmlRecord(recordData);
+    //   updateUI();
 
-      function makeHtmlRecord(recordData) {
-        recode.textContent = "";
-        for (let i = 0; i < recordData.updatedRecord.length; i++) {
-          const recordList = document.createElement("li");
-          recordList.textContent = recordData.updatedRecord[i];
-          if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
-            recordList.style.color = "red";
-          }
-          recode.append(recordList);
-        }
-      }
+    //   function makeHtmlRecord(recordData) {
+    //     recode.textContent = "";
+    //     for (let i = 0; i < recordData.updatedRecord.length; i++) {
+    //       const recordList = document.createElement("li");
+    //       recordList.textContent = recordData.updatedRecord[i];
+    //       if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
+    //         recordList.style.color = "red";
+    //       }
+    //       recode.append(recordList);
+    //     }
+    //   }
 
-      function updateUI() {
-        recodePage.style.display = "flex";
-        modal.style.display = "none";
-        playingBox.style.display = "none";
-        nextItem.style.display = "none";
-      }
-    }
+    //   function updateUI() {
+    //     recodePage.style.display = "flex";
+    //     modal.style.display = "none";
+    //     playingBox.style.display = "none";
+    //     nextItem.style.display = "none";
+    //   }
+    // }
   }
 
   function paintBlock(data) {
@@ -176,6 +200,35 @@ function makeBlock(globalData, blockNumberArray) {
       );
       miniBlock.style.backgroundColor = `${data.blockColor}`;
     });
+  }
+}
+
+function manageRecord(globalData) {
+  const recordData = new RecordData(globalData);
+  showRecord(recordData);
+}
+
+function showRecord(recordData) {
+  makeHtmlRecord(recordData);
+  updateUI();
+
+  function makeHtmlRecord(recordData) {
+    recode.textContent = "";
+    for (let i = 0; i < recordData.updatedRecord.length; i++) {
+      const recordList = document.createElement("li");
+      recordList.textContent = recordData.updatedRecord[i];
+      if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
+        recordList.style.color = "red";
+      }
+      recode.append(recordList);
+    }
+  }
+
+  function updateUI() {
+    recodePage.style.display = "flex";
+    modal.style.display = "none";
+    playingBox.style.display = "none";
+    nextItem.style.display = "none";
   }
 }
 
@@ -251,6 +304,7 @@ function moveBlockDownPerSecond(globalData) {
   }
 
   function moveBlockDown(globalData) {
+    if (globalData.pause) return;
     console.log(globalData.gameRunning);
     if (globalData.gameRunning === false) {
       clearInterval(setIntervalMoveBlockDown);
@@ -300,6 +354,7 @@ function keyPressHandler(globalData) {
   );
   function handleGameKeyPad(globalData, e) {
     // if (!globalData.gameRunning) return;
+    if (globalData.pause) return;
     if (!globalData.gameRunning) {
       window.removeEventListener("keydown", handleGameKeyPad);
       return;
@@ -336,11 +391,13 @@ function blockSave(globalData) {
 
   function checkBlockIsStop(globalData) {
     console.log(globalData.gameRunning);
-    if (globalData.gameRunning === "false") {
+    if (globalData.gameRunning === false) {
       clearInterval(setIntervalCheckBlockIsStop);
       return;
     }
-    if (globalData.isBlockGoingDown) return;
+    console.log(globalData.pause);
+    if (globalData.isBlockGoingDown || globalData.pause) return;
+
     // if (!globalData.isBlockGoingDown) {
     clearInterval(setIntervalCheckBlockIsStop);
 
@@ -429,6 +486,9 @@ function blockSave(globalData) {
     }
 
     function startNextBlock(globalData, data) {
+      console.log(globalData.pause);
+      console.log("startNExtBlcok 통과");
+      // if (globalData.pause) return;
       resetGameData(globalData, data);
 
       makeBlock(globalData);

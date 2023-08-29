@@ -16,6 +16,7 @@ export default class GlobalData {
   #currentBlockColor;
   #nextBlockType;
   #reset;
+  #pause;
 
   constructor() {
     this.#currentBlockArray = null;
@@ -33,6 +34,7 @@ export default class GlobalData {
     this.#currentBlockColor = null;
     this.#nextBlockType = null;
     this.#reset = false;
+    this.#pause = false;
   }
 
   get currentBlockArray() {
@@ -149,7 +151,7 @@ export default class GlobalData {
   }
 
   get reset() {
-    this.#reset = value;
+    return this.#reset;
   }
   set reset(value) {
     this.#reset = value;
@@ -167,6 +169,14 @@ export default class GlobalData {
     this.#justMaked = true;
     this.#currentBlockColor = null;
     this.#nextBlockType = null;
+    this.#pause = false;
     // this.#reset = false;
+  }
+
+  get pause() {
+    return this.#pause;
+  }
+  set pause(value) {
+    this.#pause = value;
   }
 }

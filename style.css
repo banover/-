@@ -55,6 +55,7 @@ body {
 .tetris__checkBtn {
   padding: 0.8rem 2rem;
   border: 1px solid black;
+  cursor: pointer;
 }
 
 .tetris__inGameBox {

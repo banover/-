@@ -1,16 +1,21 @@
 export default class RecordData {
-  #globaldata;
+  #globalData;
   #savedRecord;
   #newRecord;
   #updatedRecord;
 
   constructor(globalData) {
-    this.#globaldata = globalData;
+    this.#globalData = globalData;
     this.#savedRecord = JSON.parse(localStorage.getItem("score"));
-    this.#newRecord = this.#globaldata.pause ? null : globalData.score;
-    this.#updatedRecord = this.#savedRecord
-      ? this.addNewRecord()
-      : this.makeNewRecord();
+
+    this.#newRecord = this.#globalData.gameRunning
+      ? null
+      : this.#globalData.score;
+
+    this.#updatedRecord = this.#savedRecord;
+    // this.#updatedRecord = this.#savedRecord
+    //   ? this.addNewRecord()
+    //   : this.makeNewRecord();
   }
 
   get savedRecord() {
@@ -23,20 +28,22 @@ export default class RecordData {
     return this.#updatedRecord;
   }
 
-  addNewRecord() {
-    if (this.#globaldata.puase) {
-      return this.savedRecord;
-    }
-    const record = this.savedRecord;
-    record.push(this.newRecord);
-    record.sort((a, b) => b - a);
-    // const sortedRecord = savedRecord.slice(0, 5);
-    localStorage.setItem("score", JSON.stringify(record.slice(0, 5)));
-    return JSON.parse(localStorage.getItem("score"));
-  }
+  // addNewRecord() {
+  //   if (this.#globalData.pause) {
+  //     return this.savedRecord;
+  //   }
 
-  makeNewRecord() {
-    localStorage.setItem("score", JSON.stringify([this.newRecord]));
-    return JSON.parse(localStorage.getItem("score"));
-  }
+  //   // if (this.newRecord === null) return;
+  //   const record = this.savedRecord;
+  //   record.push(this.newRecord);
+  //   record.sort((a, b) => b - a);
+
+  //   localStorage.setItem("score", JSON.stringify(record.slice(0, 5)));
+  //   return JSON.parse(localStorage.getItem("score"));
+  // }
+
+  // makeNewRecord() {
+  //   localStorage.setItem("score", JSON.stringify([this.newRecord]));
+  //   return JSON.parse(localStorage.getItem("score"));
+  // }
 }

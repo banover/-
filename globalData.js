@@ -164,7 +164,7 @@ export default class GlobalData {
     this.#removedBlockLine = [];
     this.#blockColorArray = null;
     this.#isBlockGoingDown = null;
-    this.#score = DEFAULT_SCORE;
+    // this.#score = DEFAULT_SCORE;
     this.#gameRunning = false;
     this.#justMaked = true;
     this.#currentBlockColor = null;

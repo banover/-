@@ -98,6 +98,10 @@ function resetGameHandler(globalData) {
     playingBtn.removeEventListener("click", playGame);
     playingBtn.textContent = "다시하기";
   }
+  if (playingBtn.textContent === "다시하기") {
+    // checkBtn.removeEventListener("click", showRecordToggle);
+    checkBtn.textContent = "기록확인";
+  }
   playingBtn.addEventListener("click", gameReset);
 
   function gameReset() {
@@ -107,17 +111,24 @@ function resetGameHandler(globalData) {
     recodePage.style.display = "none";
     nextItem.style.display = "grid";
     playingBox.style.display = "grid";
-    scoreBox.textContent = `점수: ${globalData.score}`;
+    scoreBox.textContent = `점수: 0`;
+    // checkBtn.textContent = "기록확인";
     playGame();
   }
 }
 
 function checkRecordHandler(globalData) {
   checkBtn.removeEventListener("click", manageRecord);
-  checkBtn.addEventListener("click", showRecord.bind(null, globalData));
+  // checkBtn.addEventListener("click", showRecord);
+  const showRecordToggle = showRecord.bind(null, globalData);
+  // checkBtn.addEventListener("click", showRecord.bind(null, globalData));
+  checkBtn.addEventListener("click", showRecordToggle);
+  // if (checkBtn.textContent === "돌아가기") {
+  //   checkBtn.textContent = "기록확인";
+  // }
 
   function showRecord(globalData) {
-    if (globalData.gameRunning === false) return;
+    // if (globalData.gameRunning === false) return;
     if (checkBtn.textContent === "돌아가기") {
       checkBtn.textContent = "기록확인";
       recodePage.style.display = "none";
@@ -128,10 +139,53 @@ function checkRecordHandler(globalData) {
       return;
     }
 
-    checkBtn.textContent = "돌아가기";
-    globalData.pause = true;
+    if (globalData.gameRunning === false) {
+      console.log("removeEvent");
+      checkBtn.removeEventListener("click", showRecordToggle);
+    }
+
+    if (globalData.gameRunning === true) {
+      globalData.pause = true;
+      checkBtn.textContent = "돌아가기";
+    }
 
     manageRecord(globalData);
+  }
+}
+
+function manageRecord(globalData) {
+  console.log("manageRecord 진입!");
+  const recordData = new RecordData(globalData);
+  showRecord(recordData, globalData);
+}
+
+function showRecord(recordData, globalData) {
+  makeHtmlRecord(recordData, globalData);
+  updateUI();
+
+  function makeHtmlRecord(recordData) {
+    recode.textContent = "";
+    for (let i = 0; i < recordData.updatedRecord.length; i++) {
+      const recordList = document.createElement("li");
+      recordList.textContent = recordData.updatedRecord[i];
+      // if (
+      //   recordData.updatedRecord[i] === null ||
+      //   recordData.updatedRecord[i] === undefined
+      // ) {
+      //   continue;
+      // }
+      if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
+        recordList.style.color = "red";
+      }
+      recode.append(recordList);
+    }
+  }
+
+  function updateUI() {
+    recodePage.style.display = "flex";
+    modal.style.display = "none";
+    playingBox.style.display = "none";
+    nextItem.style.display = "none";
   }
 }
 
@@ -162,38 +216,21 @@ function makeBlock(globalData, blockNumberArray) {
   function gameOver(globalData) {
     modal.style.display = "block";
     menu.style.visibility = "visible";
-    console.log("game이 over했당!");
-    manageRecord(globalData);
+
+    uploadRecord(globalData);
+    // manageRecord(globalData);
     globalData.reset = true;
 
-    // function manageRecord(globalData) {
-    //   const recordData = new RecordData(globalData);
-    //   showRecord(recordData);
-    // }
-
-    // function showRecord(recordData) {
-    //   makeHtmlRecord(recordData);
-    //   updateUI();
-
-    //   function makeHtmlRecord(recordData) {
-    //     recode.textContent = "";
-    //     for (let i = 0; i < recordData.updatedRecord.length; i++) {
-    //       const recordList = document.createElement("li");
-    //       recordList.textContent = recordData.updatedRecord[i];
-    //       if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
-    //         recordList.style.color = "red";
-    //       }
-    //       recode.append(recordList);
-    //     }
-    //   }
-
-    //   function updateUI() {
-    //     recodePage.style.display = "flex";
-    //     modal.style.display = "none";
-    //     playingBox.style.display = "none";
-    //     nextItem.style.display = "none";
-    //   }
-    // }
+    function uploadRecord(globalData) {
+      let recordArray = JSON.parse(localStorage.getItem("score"));
+      if (!recordArray) {
+        localStorage.setItem("score", JSON.stringify([globalData.score]));
+        return;
+      }
+      recordArray.push(globalData.score);
+      recordArray.sort((a, b) => b - a);
+      localStorage.setItem("score", JSON.stringify(recordArray.slice(0, 5)));
+    }
   }
 
   function paintBlock(data) {
@@ -203,39 +240,6 @@ function makeBlock(globalData, blockNumberArray) {
       );
       miniBlock.style.backgroundColor = `${data.blockColor}`;
     });
-  }
-}
-
-function manageRecord(globalData) {
-  console.log("manageRecord 진입!");
-  const recordData = new RecordData(globalData);
-  showRecord(recordData, globalData);
-}
-
-function showRecord(recordData, globalData) {
-  makeHtmlRecord(recordData, globalData);
-  updateUI();
-
-  function makeHtmlRecord(recordData) {
-    recode.textContent = "";
-    for (let i = 0; i < recordData.updatedRecord.length; i++) {
-      const recordList = document.createElement("li");
-      recordList.textContent = recordData.updatedRecord[i];
-      if (!recordData.updatedRecord[i]) {
-        return;
-      }
-      if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
-        recordList.style.color = "red";
-      }
-      recode.append(recordList);
-    }
-  }
-
-  function updateUI() {
-    recodePage.style.display = "flex";
-    modal.style.display = "none";
-    playingBox.style.display = "none";
-    nextItem.style.display = "none";
   }
 }
 

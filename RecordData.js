@@ -1,11 +1,13 @@
 export default class RecordData {
+  #globaldata;
   #savedRecord;
   #newRecord;
   #updatedRecord;
 
   constructor(globalData) {
+    this.#globaldata = globalData;
     this.#savedRecord = JSON.parse(localStorage.getItem("score"));
-    this.#newRecord = globalData.score;
+    this.#newRecord = this.#globaldata.pause ? null : globalData.score;
     this.#updatedRecord = this.#savedRecord
       ? this.addNewRecord()
       : this.makeNewRecord();
@@ -22,6 +24,9 @@ export default class RecordData {
   }
 
   addNewRecord() {
+    if (this.#globaldata.puase) {
+      return this.savedRecord;
+    }
     const record = this.savedRecord;
     record.push(this.newRecord);
     record.sort((a, b) => b - a);

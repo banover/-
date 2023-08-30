@@ -32,19 +32,21 @@ const modal = document.querySelector(".tetris__gameOverModal");
 const recodePage = document.querySelector(".tetris__record");
 const recode = document.querySelector(".tetris__recordLists");
 
-function playGame() {
-  // menu.style.visibility = "hidden";
-
-  makeGameMap();
-  makeNextItem();
-  gameStart();
-}
-
 playingBtn.addEventListener("click", playGame);
+checkBtn.addEventListener("click", manageRecord);
 
 // **********************************************************************
 // 여기서부터는 함수
 // **********************************************************************
+
+function playGame() {
+  recodePage.style.display = "none";
+  playingBox.style.display = "grid";
+  nextItem.style.display = "grid";
+  makeGameMap();
+  makeNextItem();
+  gameStart();
+}
 
 function makeGameMap() {
   playingBox.textContent = "";
@@ -111,6 +113,7 @@ function resetGameHandler(globalData) {
 }
 
 function checkRecordHandler(globalData) {
+  checkBtn.removeEventListener("click", manageRecord);
   checkBtn.addEventListener("click", showRecord.bind(null, globalData));
 
   function showRecord(globalData) {
@@ -204,12 +207,13 @@ function makeBlock(globalData, blockNumberArray) {
 }
 
 function manageRecord(globalData) {
+  console.log("manageRecord 진입!");
   const recordData = new RecordData(globalData);
-  showRecord(recordData);
+  showRecord(recordData, globalData);
 }
 
-function showRecord(recordData) {
-  makeHtmlRecord(recordData);
+function showRecord(recordData, globalData) {
+  makeHtmlRecord(recordData, globalData);
   updateUI();
 
   function makeHtmlRecord(recordData) {
@@ -217,6 +221,9 @@ function showRecord(recordData) {
     for (let i = 0; i < recordData.updatedRecord.length; i++) {
       const recordList = document.createElement("li");
       recordList.textContent = recordData.updatedRecord[i];
+      if (!recordData.updatedRecord[i]) {
+        return;
+      }
       if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
         recordList.style.color = "red";
       }

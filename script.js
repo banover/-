@@ -1,8 +1,5 @@
 "use strict";
 
-// script.js 에서 map과 game으로 Class 추출하던지 해서 더 객체지향프로그래밍을 완성시켜보자.
-// 객체지향 완성 후, 추가 기능 넣고 design하던지 하자!
-
 import {
   GAME_MAP_HEIGHT,
   MAX_HEIGHT_OF_GAME_MAP,
@@ -10,6 +7,7 @@ import {
   DEFAULT_SCORE,
   SCORE_PER_ONE_LINE_BLOCK,
   NEXT_BLOCK_CENTER_POSITION_NUMBER,
+  TOTAL_NUMBER_OF_NEXTITEM_GRIDITEM,
 } from "./config.js";
 import GlobalData from "./GlobalData.js";
 import BlockMakeData from "./BlockMakeData.js";
@@ -40,16 +38,46 @@ checkBtn.addEventListener("click", manageRecord);
 // **********************************************************************
 
 function playGame() {
-  recodePage.style.display = "none";
-  playingBox.style.display = "grid";
-  nextItem.style.display = "grid";
+  resetUi();
   makeGameMap();
   makeNextItem();
   gameStart();
 }
 
-function makeGameMap() {
+function resetUi() {
+  closeRecordPage();
+  openGameMap();
+  openNextItemMap();
+  resetGameMap();
+  resetNextItemMap();
+  resetScore();
+}
+
+function closeRecordPage() {
+  recodePage.style.display = "none";
+}
+
+function openGameMap() {
+  playingBox.style.display = "grid";
+}
+
+function openNextItemMap() {
+  nextItem.style.display = "grid";
+}
+
+function resetGameMap() {
   playingBox.textContent = "";
+}
+
+function resetNextItemMap() {
+  nextItem.textContent = "";
+}
+
+function resetScore() {
+  scoreBox.textContent = `점수: 0`;
+}
+
+function makeGameMap() {
   for (let i = 0; i < GAME_MAP_HEIGHT * 10; i++) {
     const gridItem = makeGridItem(i);
     playingBox.append(gridItem);
@@ -67,8 +95,7 @@ function makeGameMap() {
 }
 
 function makeNextItem() {
-  nextItem.textContent = "";
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < TOTAL_NUMBER_OF_NEXTITEM_GRIDITEM; i++) {
     const gridItem = makeNextGridItem(i);
     nextItem.append(gridItem);
   }
@@ -84,7 +111,7 @@ function makeNextItem() {
 
 function gameStart() {
   const globalData = new GlobalData();
-  resetGameHandler(globalData);
+  restartGameHandler(globalData);
   checkRecordHandler(globalData);
   makeBlock(globalData);
   makeNextBlock(globalData);
@@ -93,28 +120,37 @@ function gameStart() {
   blockSave(globalData);
 }
 
-function resetGameHandler(globalData) {
+function restartGameHandler(globalData) {
+  changePlayingBtnText();
+  removeOriginalPlayingBtnListener();
+  addPlayingBtnGameRestartListener(globalData);
+}
+
+function changePlayingBtnText() {
   if ((playingBtn.textContent = "시작")) {
-    playingBtn.removeEventListener("click", playGame);
     playingBtn.textContent = "다시하기";
   }
   if (playingBtn.textContent === "다시하기") {
-    // checkBtn.removeEventListener("click", showRecordToggle);
     checkBtn.textContent = "기록확인";
   }
-  playingBtn.addEventListener("click", gameReset);
+}
 
-  function gameReset() {
-    playingBtn.removeEventListener("click", gameReset);
-    globalData.reset = true;
+function removeOriginalPlayingBtnListener() {
+  playingBtn.removeEventListener("click", playGame);
+}
 
-    recodePage.style.display = "none";
-    nextItem.style.display = "grid";
-    playingBox.style.display = "grid";
-    scoreBox.textContent = `점수: 0`;
-    // checkBtn.textContent = "기록확인";
+function addPlayingBtnGameRestartListener(globalData) {
+  playingBtn.addEventListener("click", gameRestart);
+
+  function gameRestart() {
+    playingBtn.removeEventListener("click", gameRestart);
+    resetGlobalData(globalData);
     playGame();
   }
+}
+
+function resetGlobalData(globalData) {
+  globalData.reset = true;
 }
 
 function checkRecordHandler(globalData) {

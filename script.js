@@ -22,7 +22,7 @@ import RecordData from "./RecordData.js";
 
 const menu = document.querySelector(".tetris__menu");
 const playingBtn = document.querySelector(".tetris__playingBtn");
-const checkBtn = document.querySelector(".tetris__checkBtn");
+const recordBtn = document.querySelector(".tetris__checkBtn");
 const nextItem = document.querySelector(".tetris__nextItem");
 const playingBox = document.querySelector(".tetris__inGameBox");
 const scoreBox = document.querySelector(".tetris__scoreBox");
@@ -31,7 +31,7 @@ const recodePage = document.querySelector(".tetris__record");
 const recode = document.querySelector(".tetris__recordLists");
 
 playingBtn.addEventListener("click", playGame);
-checkBtn.addEventListener("click", manageRecord);
+recordBtn.addEventListener("click", showRecord);
 
 // **********************************************************************
 // 여기서부터는 함수
@@ -112,7 +112,7 @@ function makeNextItem() {
 function gameStart() {
   const globalData = new GlobalData();
   restartGameHandler(globalData);
-  checkRecordHandler(globalData);
+  showRecordHandler(globalData);
   makeBlock(globalData);
   makeNextBlock(globalData);
   moveBlockDownPerSecond(globalData);
@@ -131,7 +131,7 @@ function changePlayingBtnText() {
     playingBtn.textContent = "다시하기";
   }
   if (playingBtn.textContent === "다시하기") {
-    checkBtn.textContent = "기록확인";
+    recordBtn.textContent = "기록확인";
   }
 }
 
@@ -153,130 +153,226 @@ function resetGlobalData(globalData) {
   globalData.reset = true;
 }
 
-function checkRecordHandler(globalData) {
-  checkBtn.removeEventListener("click", manageRecord);
-  // checkBtn.addEventListener("click", showRecord);
-  const showRecordToggle = showRecord.bind(null, globalData);
-  // checkBtn.addEventListener("click", showRecord.bind(null, globalData));
-  checkBtn.addEventListener("click", showRecordToggle);
-  // if (checkBtn.textContent === "돌아가기") {
-  //   checkBtn.textContent = "기록확인";
-  // }
+function showRecordHandler(globalData) {
+  removeOriginalRecordBtnListener();
+  // const showRecordToggle = showRecord.bind(null, globalData);
+  recordBtn.addEventListener("click", showRecordToggle);
 
-  function showRecord(globalData) {
-    // if (globalData.gameRunning === false) return;
-    if (checkBtn.textContent === "돌아가기") {
-      checkBtn.textContent = "기록확인";
-      recodePage.style.display = "none";
-      nextItem.style.display = "grid";
-      playingBox.style.display = "grid";
-      globalData.pause = false;
+  function showRecordToggle() {
+    if (recordBtn.textContent === "돌아가기") {
+      changeRecordBtnText();
+      closeRecordPage();
+      openGameMap();
+      openNextItemMap();
+      unPauseGame(globalData);
 
       return;
     }
 
     if (globalData.gameRunning === false) {
       console.log("removeEvent");
-      checkBtn.removeEventListener("click", showRecordToggle);
+      recordBtn.removeEventListener("click", showRecordToggle);
     }
 
     if (globalData.gameRunning === true) {
-      globalData.pause = true;
-      checkBtn.textContent = "돌아가기";
+      pauseGame(globalData);
+      changeRecordBtnText();
     }
 
-    manageRecord(globalData);
+    showRecord(globalData);
   }
 }
 
-function manageRecord(globalData) {
-  console.log("manageRecord 진입!");
+function removeOriginalRecordBtnListener() {
+  recordBtn.removeEventListener("click", showRecord);
+}
+
+function showRecord(globalData) {
   const recordData = new RecordData(globalData);
-  showRecord(recordData, globalData);
+  console.log(recordData);
+
+  resetRecordPage();
+  presentRecord(makeHtmlRecord(recordData));
+  updateUI();
 }
 
-function showRecord(recordData, globalData) {
-  makeHtmlRecord(recordData, globalData);
-  updateUI();
+function resetRecordPage() {
+  recode.textContent = "";
+}
 
-  function makeHtmlRecord(recordData) {
-    recode.textContent = "";
-    for (let i = 0; i < recordData.updatedRecord.length; i++) {
-      const recordList = document.createElement("li");
-      recordList.textContent = recordData.updatedRecord[i];
-      // if (
-      //   recordData.updatedRecord[i] === null ||
-      //   recordData.updatedRecord[i] === undefined
-      // ) {
-      //   continue;
-      // }
-      if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
-        recordList.style.color = "red";
-      }
-      recode.append(recordList);
+function presentRecord(htmlRecordArray) {
+  htmlRecordArray.map((htmlRecord) => recode.append(htmlRecord));
+}
+
+function makeHtmlRecord(recordData) {
+  let result = [];
+  for (let i = 0; i < recordData.updatedRecord?.length; i++) {
+    const recordList = document.createElement("li");
+    recordList.textContent = recordData.updatedRecord[i];
+
+    if (Number(recordData.updatedRecord[i]) === recordData.newRecord) {
+      recordList.style.color = "red";
     }
+    result.push(recordList);
+  }
+  return result;
+}
+
+function updateUI() {
+  recodePage.style.display = "flex";
+  modal.style.display = "none";
+  playingBox.style.display = "none";
+  nextItem.style.display = "none";
+}
+
+function changeRecordBtnText() {
+  if (recordBtn.textContent === "돌아가기") {
+    recordBtn.textContent = "기록확인";
+    return;
   }
 
-  function updateUI() {
-    recodePage.style.display = "flex";
-    modal.style.display = "none";
-    playingBox.style.display = "none";
-    nextItem.style.display = "none";
-  }
+  recordBtn.textContent = "돌아가기";
+}
+
+function unPauseGame(globalData) {
+  globalData.pause = false;
+}
+
+function pauseGame(globalData) {
+  globalData.pause = true;
 }
 
 function makeBlock(globalData, blockNumberArray) {
   const DataAboutMakeBlock = new BlockMakeData(globalData, blockNumberArray);
-
   paintBlocks(globalData, DataAboutMakeBlock);
+}
 
-  function paintBlocks(globalData, data) {
-    if (data.isBlockTypeBlockLine) {
-      return paintBlockLine(globalData, data.currentBlockNumberArray);
+function paintBlocks(globalData, data) {
+  if (data.isBlockTypeBlockLine) {
+    return paintBlockLine(globalData, data.currentBlockNumberArray);
+  }
+
+  if (!data.isThereEmptySpace) return gameOver(globalData);
+
+  paintBlock(data);
+}
+
+function paintBlockLine(globalData, blockNumberArray) {
+  blockNumberArray.map((item, index) => {
+    const miniBlock = document.querySelector(
+      `.tetris__gridItem[data-id="${item}"]`
+    );
+    miniBlock.style.backgroundColor = globalData.blockColorArray[index];
+  });
+}
+
+function gameOver(globalData) {
+  showGameOverModal();
+  showMenuBar();
+  uploadRecord(globalData);
+  resetGlobalData(globalData);
+}
+
+function showGameOverModal() {
+  modal.style.display = "block";
+}
+
+function showMenuBar() {
+  menu.style.visibility = "visible";
+}
+
+function uploadRecord(globalData) {
+  let recordArray = JSON.parse(localStorage.getItem("score"));
+  if (!recordArray) {
+    localStorage.setItem("score", JSON.stringify([globalData.score]));
+    return;
+  }
+  recordArray.push(globalData.score);
+  recordArray.sort((a, b) => b - a);
+  localStorage.setItem("score", JSON.stringify(recordArray.slice(0, 5)));
+}
+
+function paintBlock(data) {
+  data.currentBlockNumberArray.map((item) => {
+    const miniBlock = document.querySelector(
+      `.tetris__gridItem[data-id="${item}"]`
+    );
+    miniBlock.style.backgroundColor = `${data.blockColor}`;
+  });
+}
+
+function makeNextBlock(globalData) {
+  const nextBlockTypeNumberArray = new NextBlockTypeData(globalData)
+    .nextBlockTypeNumberArray;
+  paintNextBlockItem(nextBlockTypeNumberArray);
+}
+
+function paintNextBlockItem(nextBlockTypeNumberArray) {
+  nextBlockTypeNumberArray.map((item) => {
+    const miniBlock = document.querySelector(
+      `.tetris__nextGridItem[data-id="${item}"]`
+    );
+    miniBlock.style.backgroundColor = `white`;
+  });
+}
+
+function moveBlockDownPerSecond(globalData) {
+  globalData.isBlockGoingDown = true;
+  const intervalmillisecond = getMoveBlockDownSecond(globalData);
+
+  const setIntervalMoveBlockDown = setInterval(
+    moveBlockDown.bind(null, globalData),
+    intervalmillisecond
+  );
+
+  function moveBlockDown(globalData) {
+    if (globalData.pause) return;
+    if (globalData.gameRunning === false) {
+      clearInterval(setIntervalMoveBlockDown);
+      return;
     }
+    globalData.currentKeyPress = "ArrowDown";
 
-    if (!data.isThereEmptySpace) return gameOver(globalData);
+    canBlockMove(globalData)
+      ? moveBlock(globalData)
+      : clearIntervalMoveBlockDown(globalData);
 
-    paintBlock(data);
-  }
-
-  function paintBlockLine(globalData, blockNumberArray) {
-    blockNumberArray.map((item, index) => {
-      const miniBlock = document.querySelector(
-        `.tetris__gridItem[data-id="${item}"]`
-      );
-      miniBlock.style.backgroundColor = globalData.blockColorArray[index];
-    });
-  }
-
-  function gameOver(globalData) {
-    modal.style.display = "block";
-    menu.style.visibility = "visible";
-
-    uploadRecord(globalData);
-    // manageRecord(globalData);
-    globalData.reset = true;
-
-    function uploadRecord(globalData) {
-      let recordArray = JSON.parse(localStorage.getItem("score"));
-      if (!recordArray) {
-        localStorage.setItem("score", JSON.stringify([globalData.score]));
-        return;
-      }
-      recordArray.push(globalData.score);
-      recordArray.sort((a, b) => b - a);
-      localStorage.setItem("score", JSON.stringify(recordArray.slice(0, 5)));
+    function clearIntervalMoveBlockDown(globalData) {
+      clearInterval(setIntervalMoveBlockDown);
+      globalData.isBlockGoingDown = false;
     }
   }
+}
 
-  function paintBlock(data) {
-    data.currentBlockNumberArray.map((item) => {
-      const miniBlock = document.querySelector(
-        `.tetris__gridItem[data-id="${item}"]`
-      );
-      miniBlock.style.backgroundColor = `${data.blockColor}`;
-    });
+function getMoveBlockDownSecond(globalData) {
+  // test로 만든거임 언제든지 수치 바꾸면 된다.
+  if (globalData.score > 5 && globalData.score < 10) {
+    return 900;
+  } else if (globalData.score > 10 && globalData.score < 20) {
+    return 600;
+  } else if (globalData.score > 20) {
+    return 300;
   }
+
+  return 1000;
+}
+
+function canBlockMove(globalData) {
+  const dataAboutMove = new BlockMoveData(globalData);
+
+  if (canFutureBlockExist(globalData, dataAboutMove)) return true;
+  return false;
+}
+
+function canFutureBlockExist(globalData, data) {
+  if (
+    globalData.currentBlockType !== "blockLine" &&
+    data.isFutureBlockOverGameMap
+  ) {
+    return false;
+  }
+
+  return data.canfutureBlockPainted();
 }
 
 function moveBlock(globalData) {
@@ -294,138 +390,38 @@ function removeCurrentBlock(globalData) {
   });
 }
 
-function canBlockMove(globalData) {
-  const dataAboutMove = new BlockMoveData(globalData);
-
-  if (canFutureBlockExist(globalData, dataAboutMove)) return true;
-
-  return false;
-
-  function canFutureBlockExist(globalData, data) {
-    if (
-      globalData.currentBlockType !== "blockLine" &&
-      data.isFutureBlockOverGameMap
-    ) {
-      return false;
-    }
-
-    return data.canfutureBlockPainted();
-  }
-}
-
-function makeNextBlock(globalData) {
-  const nextBlockTypeNumberArray = new NextBlockTypeData(globalData)
-    .nextBlockTypeNumberArray;
-  paintNextBlockItem(nextBlockTypeNumberArray);
-
-  function paintNextBlockItem(nextBlockTypeNumberArray) {
-    nextBlockTypeNumberArray.map((item) => {
-      const miniBlock = document.querySelector(
-        `.tetris__nextGridItem[data-id="${item}"]`
-      );
-      miniBlock.style.backgroundColor = `white`;
-    });
-  }
-}
-
-function moveBlockDownPerSecond(globalData) {
-  globalData.isBlockGoingDown = true;
-  const intervalmillisecond = getMoveBlockDownSecond(globalData);
-  // console.log(intervalmillisecond);
-
-  const setIntervalMoveBlockDown = setInterval(
-    moveBlockDown.bind(null, globalData),
-    intervalmillisecond
-  );
-
-  function getMoveBlockDownSecond(globalData) {
-    if (globalData.score > 5 && globalData.score < 10) {
-      return 900;
-    } else if (globalData.score > 10 && globalData.score < 20) {
-      return 600;
-    } else if (globalData.score > 20) {
-      return 300;
-    }
-
-    return 1000;
-  }
-
-  function moveBlockDown(globalData) {
-    if (globalData.pause) return;
-    console.log(globalData.gameRunning);
-    if (globalData.gameRunning === false) {
-      clearInterval(setIntervalMoveBlockDown);
-      return;
-    }
-    globalData.currentKeyPress = "ArrowDown";
-
-    canBlockMove(globalData)
-      ? moveBlock(globalData)
-      : clearIntervalMoveBlockDown(globalData);
-  }
-
-  function clearIntervalMoveBlockDown() {
-    clearInterval(setIntervalMoveBlockDown);
-    globalData.isBlockGoingDown = false;
-  }
-}
-
 function keyPressHandler(globalData) {
-  window.addEventListener(
-    "keydown",
-    handleGameKeyPad.bind(null, globalData)
+  const gameKeyHandler = handleGameKeyPad.bind(null, globalData);
+  window.addEventListener("keydown", gameKeyHandler);
 
-    // function handleGameKeyPad(e, globalData) {
-    //   if (!globalData.gameRunning) return;
-    //   if (isArrowKeyPressed(globalData, e.key)) moveBlock(globalData);
-    //   if (isSpaceKeyPressed(globalData, e.key)) moveBlock(globalData);
-    // }
-
-    // function isArrowKeyPressed(globalData, key) {
-    //   globalData.currentKeyPress = key;
-
-    //   return (
-    //     globalData.currentKeyPress === "ArrowRight" ||
-    //     globalData.currentKeyPress === "ArrowLeft" ||
-    //     globalData.currentKeyPress === "ArrowUp" ||
-    //     globalData.currentKeyPress === "ArrowDown"
-    //   );
-    // }
-
-    // function isSpaceKeyPressed(globalData, key) {
-    //   globalData.currentKeyPress = key;
-
-    //   return globalData.currentKeyPress === " ";
-    // }
-    // }
-  );
   function handleGameKeyPad(globalData, e) {
-    // if (!globalData.gameRunning) return;
     if (globalData.pause) return;
     if (!globalData.gameRunning) {
-      window.removeEventListener("keydown", handleGameKeyPad);
+      window.removeEventListener("keydown", gameKeyHandler);
       return;
     }
-    if (isArrowKeyPressed(globalData, e.key)) moveBlock(globalData);
-    if (isSpaceKeyPressed(globalData, e.key)) moveBlock(globalData);
+
+    registerCurrentKeyPress(globalData, e.key);
+    if (isArrowKeyPressed(globalData)) moveBlock(globalData);
+    if (isSpaceKeyPressed(globalData)) moveBlock(globalData);
   }
+}
 
-  function isArrowKeyPressed(globalData, key) {
-    globalData.currentKeyPress = key;
+function registerCurrentKeyPress(globalData, key) {
+  globalData.currentKeyPress = key;
+}
 
-    return (
-      globalData.currentKeyPress === "ArrowRight" ||
-      globalData.currentKeyPress === "ArrowLeft" ||
-      globalData.currentKeyPress === "ArrowUp" ||
-      globalData.currentKeyPress === "ArrowDown"
-    );
-  }
+function isArrowKeyPressed(globalData) {
+  return (
+    globalData.currentKeyPress === "ArrowRight" ||
+    globalData.currentKeyPress === "ArrowLeft" ||
+    globalData.currentKeyPress === "ArrowUp" ||
+    globalData.currentKeyPress === "ArrowDown"
+  );
+}
 
-  function isSpaceKeyPressed(globalData, key) {
-    globalData.currentKeyPress = key;
-
-    return globalData.currentKeyPress === " ";
-  }
+function isSpaceKeyPressed(globalData) {
+  return globalData.currentKeyPress === " ";
 }
 
 // 마지막으로 블락이 바닥에 놓이고 다음 블록이 나올 때 까지의 시간을 일정하게 해보자, 지금은 조금 덜일정함
@@ -437,15 +433,13 @@ function blockSave(globalData) {
   );
 
   function checkBlockIsStop(globalData) {
-    console.log(globalData.gameRunning);
     if (globalData.gameRunning === false) {
       clearInterval(setIntervalCheckBlockIsStop);
       return;
     }
-    console.log(globalData.pause);
+
     if (globalData.isBlockGoingDown || globalData.pause) return;
 
-    // if (!globalData.isBlockGoingDown) {
     clearInterval(setIntervalCheckBlockIsStop);
 
     const blockSaveData = new LastSavedBlockData(globalData);
@@ -454,120 +448,121 @@ function blockSave(globalData) {
     moveAllBlockLineToBottom(globalData, blockSaveData);
     renderScore(globalData);
     startNextBlock(globalData, blockSaveData);
-    // // keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
-    // }
+    //  keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
+  }
+}
 
-    function removefullColorLine(globalData, data) {
-      const blockLineData = getBlockLineData(data);
+function removefullColorLine(globalData, data) {
+  const blockLineData = getBlockLineData(data);
+  removeBlockLineFullOfColor(globalData, blockLineData, data);
+}
 
-      removeBlockLineFullOfColor(globalData, blockLineData);
+function getBlockLineData(data) {
+  const result = [];
+  for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
+    result.push(new BlockLineDataForRemove(data.lastSavedBlockLines[i]));
+  }
+  return result;
+}
 
-      function getBlockLineData(data) {
-        const result = [];
-        for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
-          result.push(new BlockLineDataForRemove(data.lastSavedBlockLines[i]));
-        }
-        return result;
-      }
+function removeBlockLineFullOfColor(globalData, blockLineData, data) {
+  for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
+    if (blockLineData[i].isfull) {
+      removeBlockLine(blockLineData[i].blockLineNumberArray);
 
-      function removeBlockLineFullOfColor(globalData, blockLineData) {
-        for (let i = 0; i < data.lastSavedBlockLines.length; i++) {
-          if (blockLineData[i].isfull) {
-            removeBlockLine(blockLineData[i].blockLineNumberArray);
-
-            globalData.removedBlockLine = blockLineData[i].blockLine;
-          }
-        }
-
-        function removeBlockLine(numberArray) {
-          numberArray.map((b) => {
-            document.querySelector(
-              `.tetris__gridItem[data-id="${b}"]`
-            ).style.backgroundColor = "white";
-          });
-        }
-      }
+      globalData.removedBlockLine = blockLineData[i].blockLine;
+      // 위 코드를 다른 곳으로 뺄 방법이 없을까?
     }
+  }
+}
 
-    function moveAllBlockLineToBottom(globalData, data) {
-      const inGameData = new BlockLineData(globalData, data);
+function removeBlockLine(numberArray) {
+  numberArray.map((b) => {
+    document.querySelector(
+      `.tetris__gridItem[data-id="${b}"]`
+    ).style.backgroundColor = "white";
+  });
+}
 
-      moveRemainBlockDown(globalData, inGameData);
+function moveAllBlockLineToBottom(globalData, data) {
+  const inGameData = new BlockLineData(globalData, data);
+  moveRemainBlockDown(globalData, inGameData);
+}
 
-      function moveRemainBlockDown(globalData, inGameData) {
-        const enrichedData = new EnrichedBlockLineData(inGameData);
+function moveRemainBlockDown(globalData, inGameData) {
+  const enrichedData = new EnrichedBlockLineData(inGameData);
+  // new BlockLineData에 data를 다 정리해두고 쓰면 안되나? Enrich를 만들어야하나?
+  moveTargetBlockLineToDown(globalData, enrichedData);
+}
 
-        moveTargetBlockLineToDown(globalData, enrichedData);
+function moveTargetBlockLineToDown(globalData, enrichedData) {
+  if (enrichedData?.targetBlockLineNumberArray?.length) {
+    for (let i = 0; i < enrichedData.numberOfBlockLine; i++) {
+      selectMoveTargetBlock(globalData, enrichedData, i);
+      settingForMoveBlock(globalData, enrichedData, i);
 
-        function moveTargetBlockLineToDown(globalData, enrichedData) {
-          if (enrichedData?.targetBlockLineNumberArray?.length) {
-            for (let i = 0; i < enrichedData.numberOfBlockLine; i++) {
-              globalData.currentBlockArray =
-                enrichedData.targetBlockLineNumberArray[i];
-              globalData.currentBlockType = "blockLine";
-              globalData.blockColorArray = enrichedData.getBlockLineColors(
-                enrichedData.targetBlockLineNumberArray[i]
-              );
-              for (let j = 0; j < enrichedData.removedBlockLine.length; j++) {
-                globalData.currentKeyPress = "ArrowDown";
-                moveBlock(globalData);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    function renderScore(globalData) {
-      if (globalData.removedBlockLine.length) {
-        for (let i = 0; i < globalData.removedBlockLine.length; i++) {
-          addScore(globalData);
-        }
-      }
-
-      scoreBox.textContent = `점수: ${globalData.score}`;
-
-      function addScore(globalData) {
-        globalData.score = globalData.score + SCORE_PER_ONE_LINE_BLOCK;
-      }
-    }
-
-    function startNextBlock(globalData, data) {
-      console.log(globalData.pause);
-      console.log("startNExtBlcok 통과");
-      // if (globalData.pause) return;
-      resetGameData(globalData, data);
-
-      makeBlock(globalData);
-      makeNextBlock(globalData);
-      if (globalData.gameRunning) {
-        moveBlockDownPerSecond(globalData);
-        blockSave(globalData);
-      }
-
-      function resetGameData(globalData, data) {
-        globalData.currentBlockType = "";
-
-        globalData.maxHeightBlockLine = data.removedBlockLine.length
-          ? globalData.maxHeightBlockLine + data.removedBlockLine.length
-          : globalData.maxHeightBlockLine;
-        // : data.maxHeightBlockLine;
-
-        globalData.removedBlockLine = 0;
-        globalData.justMaked = true;
-
-        clearNextGridItem();
-
-        function clearNextGridItem() {
-          const AllNextGridItem = document.querySelectorAll(
-            ".tetris__nextGridItem"
-          );
-
-          AllNextGridItem.forEach((curruntValue) => {
-            curruntValue.style.backgroundColor = "black";
-          });
-        }
+      for (let j = 0; j < enrichedData.removedBlockLine.length; j++) {
+        moveBlock(globalData);
       }
     }
   }
+}
+
+function selectMoveTargetBlock(globalData, enrichedData, i) {
+  globalData.currentBlockArray = enrichedData.targetBlockLineNumberArray[i];
+}
+
+function settingForMoveBlock(globalData, enrichedData, i) {
+  globalData.currentBlockType = "blockLine";
+  globalData.blockColorArray = enrichedData.getBlockLineColors(
+    enrichedData.targetBlockLineNumberArray[i]
+  );
+  globalData.currentKeyPress = "ArrowDown";
+}
+
+function renderScore(globalData) {
+  if (globalData.removedBlockLine.length) {
+    for (let i = 0; i < globalData.removedBlockLine.length; i++) {
+      addScore(globalData);
+    }
+
+    updateScoreUI(globalData);
+  }
+}
+
+function addScore(globalData) {
+  globalData.score = globalData.score + SCORE_PER_ONE_LINE_BLOCK;
+}
+
+function updateScoreUI(globalData) {
+  scoreBox.textContent = `점수: ${globalData.score}`;
+}
+
+function startNextBlock(globalData, data) {
+  resetGameDataForNextBlock(globalData, data);
+  makeBlock(globalData);
+  makeNextBlock(globalData);
+  if (globalData.gameRunning) {
+    moveBlockDownPerSecond(globalData);
+    blockSave(globalData);
+  }
+}
+
+function resetGameDataForNextBlock(globalData, data) {
+  globalData.currentBlockType = "";
+  globalData.maxHeightBlockLine = data.removedBlockLine.length
+    ? globalData.maxHeightBlockLine + data.removedBlockLine.length
+    : globalData.maxHeightBlockLine;
+
+  globalData.removedBlockLine = 0;
+  globalData.justMaked = true;
+  clearNextGridItem();
+}
+
+function clearNextGridItem() {
+  const AllNextGridItem = document.querySelectorAll(".tetris__nextGridItem");
+
+  AllNextGridItem.forEach((gridItem) => {
+    gridItem.style.backgroundColor = "black";
+  });
 }

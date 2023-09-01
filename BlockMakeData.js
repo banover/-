@@ -92,21 +92,19 @@ export default class BlockMakeData {
   }
 
   getBlockType() {
-    // const result =
     if (this.#globalData.currentBlockType) {
       return this.#globalData.currentBlockType;
-    } else if (this.nextBlockType.length && !this.isFirstBlock) {
+    }
+    if (this.nextBlockType.length && !this.isFirstBlock) {
       this.#globalData.currentBlockType = this.nextBlockType[0];
       this.nextBlockType = "remove first item and push a new random BlockType";
       return this.#globalData.currentBlockType;
-    } else {
-      const newBlockType = this.getRandomBlockType();
-      this.#globalData.nextBlockType = this.nextBlockType[0];
-      this.#globalData.currentBlockType = newBlockType;
-
-      // this.nextBlockType = "remove first item and push a new random BlockType";
-      return newBlockType;
     }
+    const newBlockType = this.getRandomBlockType();
+    this.#globalData.nextBlockType = this.nextBlockType[0];
+    this.#globalData.currentBlockType = newBlockType;
+
+    return newBlockType;
   }
 
   setBlockNumberArray() {

@@ -1,6 +1,6 @@
 export default class BlockLineData {
   #globalData;
-  #originalData;
+  // #originalData;
   #removedBlockLine;
   #numberOfBlockLineTodown;
   #boundryToDown;
@@ -10,9 +10,10 @@ export default class BlockLineData {
   #isRemainBlockGoDown;
   #isBlockLineRemoved;
   #targetBlockLineNumberArray;
-  constructor(globalData, data) {
+  // constructor(globalData, data) {
+  constructor(globalData) {
     this.#globalData = globalData;
-    this.#originalData = data;
+    // this.#originalData = data;
 
     this.#removedBlockLine = this.#globalData.removedBlockLine;
 

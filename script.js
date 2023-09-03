@@ -80,16 +80,16 @@ function makeGameMap() {
     const gridItem = makeGridItem(i);
     playingBox.append(gridItem);
   }
+}
 
-  function makeGridItem(i) {
-    const gridCell = document.createElement("div");
-    gridCell.classList.add("tetris__gridItem");
-    gridCell.setAttribute("data-id", i + 1);
-    if (i < 10) {
-      gridCell.style.visibility = "hidden";
-    }
-    return gridCell;
+function makeGridItem(i) {
+  const gridCell = document.createElement("div");
+  gridCell.classList.add("tetris__gridItem");
+  gridCell.setAttribute("data-id", i + 1);
+  if (i < 10) {
+    gridCell.style.visibility = "hidden";
   }
+  return gridCell;
 }
 
 function makeNextItem() {
@@ -97,14 +97,14 @@ function makeNextItem() {
     const gridItem = makeNextGridItem(i);
     nextItem.append(gridItem);
   }
+}
 
-  function makeNextGridItem(i) {
-    const gridCell = document.createElement("div");
-    gridCell.classList.add("tetris__nextGridItem");
-    gridCell.setAttribute("data-id", i + 1);
+function makeNextGridItem(i) {
+  const gridCell = document.createElement("div");
+  gridCell.classList.add("tetris__nextGridItem");
+  gridCell.setAttribute("data-id", i + 1);
 
-    return gridCell;
-  }
+  return gridCell;
 }
 
 function gameStart() {
@@ -168,7 +168,6 @@ function showRecordHandler(globalData) {
     }
 
     if (globalData.gameRunning === false) {
-      console.log("removeEvent");
       recordBtn.removeEventListener("click", showRecordToggle);
     }
 
@@ -183,6 +182,23 @@ function showRecordHandler(globalData) {
 
 function removeOriginalRecordBtnListener() {
   recordBtn.removeEventListener("click", showRecord);
+}
+
+function changeRecordBtnText() {
+  if (recordBtn.textContent === "돌아가기") {
+    recordBtn.textContent = "기록확인";
+    return;
+  }
+
+  recordBtn.textContent = "돌아가기";
+}
+
+function unPauseGame(globalData) {
+  globalData.pause = false;
+}
+
+function pauseGame(globalData) {
+  globalData.pause = true;
 }
 
 function showRecord(globalData) {
@@ -223,34 +239,24 @@ function updateUI() {
   nextItem.style.display = "none";
 }
 
-function changeRecordBtnText() {
-  if (recordBtn.textContent === "돌아가기") {
-    recordBtn.textContent = "기록확인";
-    return;
-  }
-
-  recordBtn.textContent = "돌아가기";
-}
-
-function unPauseGame(globalData) {
-  globalData.pause = false;
-}
-
-function pauseGame(globalData) {
-  globalData.pause = true;
-}
-
 function makeBlock(globalData, blockNumberArray) {
   const DataAboutMakeBlock = new BlockMakeData(globalData, blockNumberArray);
-  paintBlocks(globalData, DataAboutMakeBlock);
+
+  if (canBlockBePainted(DataAboutMakeBlock)) {
+    return paintBlocks(globalData, DataAboutMakeBlock);
+  }
+
+  gameOver(globalData);
+}
+
+function canBlockBePainted(data) {
+  return data.isThereEmptySpace;
 }
 
 function paintBlocks(globalData, data) {
   if (data.isBlockTypeBlockLine) {
     return paintBlockLine(globalData, data.currentBlockNumberArray);
   }
-
-  if (!data.isThereEmptySpace) return gameOver(globalData);
 
   paintBlock(data);
 }
@@ -261,6 +267,15 @@ function paintBlockLine(globalData, blockNumberArray) {
       `.tetris__gridItem[data-id="${item}"]`
     );
     miniBlock.style.backgroundColor = globalData.blockColorArray[index];
+  });
+}
+
+function paintBlock(data) {
+  data.currentBlockNumberArray.map((item) => {
+    const miniBlock = document.querySelector(
+      `.tetris__gridItem[data-id="${item}"]`
+    );
+    miniBlock.style.backgroundColor = `${data.blockColor}`;
   });
 }
 
@@ -288,15 +303,6 @@ function uploadRecord(globalData) {
   recordArray.push(globalData.score);
   recordArray.sort((a, b) => b - a);
   localStorage.setItem("score", JSON.stringify(recordArray.slice(0, 5)));
-}
-
-function paintBlock(data) {
-  data.currentBlockNumberArray.map((item) => {
-    const miniBlock = document.querySelector(
-      `.tetris__gridItem[data-id="${item}"]`
-    );
-    miniBlock.style.backgroundColor = `${data.blockColor}`;
-  });
 }
 
 function makeNextBlock(globalData) {
@@ -400,8 +406,9 @@ function keyPressHandler(globalData) {
     }
 
     registerCurrentKeyPress(globalData, e.key);
-    if (isArrowKeyPressed(globalData)) moveBlock(globalData);
-    if (isSpaceKeyPressed(globalData)) moveBlock(globalData);
+    if (isArrowKeyPressed(globalData) || isSpaceKeyPressed(globalData)) {
+      moveBlock(globalData);
+    }
   }
 }
 
@@ -441,12 +448,10 @@ function blockSave(globalData) {
     clearInterval(setIntervalCheckBlockIsStop);
 
     const blockSaveData = new LastSavedBlockData(globalData);
-
     removefullColorLine(globalData, blockSaveData);
-    moveAllBlockLineToBottom(globalData, blockSaveData);
+    moveAllBlockLineToBottom(globalData);
     renderScore(globalData);
     startNextBlock(globalData, blockSaveData);
-    //  keyPressHandler();          ******* keyPressHandler가 한번 이상 설정되면 두번적용되서 두칸이 이동함 주의*******
   }
 }
 
@@ -482,8 +487,8 @@ function removeBlockLine(numberArray) {
   });
 }
 
-function moveAllBlockLineToBottom(globalData, data) {
-  const inGameData = new BlockLineData(globalData, data);
+function moveAllBlockLineToBottom(globalData) {
+  const inGameData = new BlockLineData(globalData);
   moveAllTargetBlockLineToDown(globalData, inGameData);
 }
 
@@ -535,10 +540,8 @@ function startNextBlock(globalData, data) {
   resetGameDataForNextBlock(globalData, data);
   makeBlock(globalData);
   makeNextBlock(globalData);
-  if (globalData.gameRunning) {
-    moveBlockDownPerSecond(globalData);
-    blockSave(globalData);
-  }
+  moveBlockDownPerSecond(globalData);
+  blockSave(globalData);
 }
 
 function resetGameDataForNextBlock(globalData, data) {

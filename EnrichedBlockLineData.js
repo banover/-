@@ -1,3 +1,4 @@
+// 추후 버그를 대비해서 잠시 내버려둠
 export default class EnrichedBlockLineData {
   #inGameData;
   #isBlockLineRemoved;

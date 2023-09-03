@@ -9,6 +9,7 @@ export default class BlockLineData {
   #numberOfBlockLine;
   #isRemainBlockGoDown;
   #isBlockLineRemoved;
+  #targetBlockLineNumberArray;
   constructor(globalData, data) {
     this.#globalData = globalData;
     this.#originalData = data;
@@ -29,6 +30,8 @@ export default class BlockLineData {
 
     this.#isRemainBlockGoDown = this.isRemainBlockGoDown();
     this.#isBlockLineRemoved = this.isBlockLineRemoved();
+
+    this.#targetBlockLineNumberArray = this.getTargetBlockLineNumberArray();
   }
 
   get removedBlockLine() {
@@ -62,6 +65,9 @@ export default class BlockLineData {
   get getBlockLineNumberArray() {
     return this.getBlockLineNumberArray;
   }
+  get targetBlockLineNumberArray() {
+    return this.#targetBlockLineNumberArray;
+  }
 
   isRemainBlockGoDown() {
     return this.minRemovedBlockLine > this.boundryToTop;
@@ -94,5 +100,20 @@ export default class BlockLineData {
     }
 
     return result;
+  }
+
+  getTargetBlockLineNumberArray() {
+    if (this.isBlockLineRemoved && this.isRemainBlockGoDown) {
+      const result = [];
+
+      for (let i = 0; i < this.numberOfBlockLine; i++) {
+        const targetBlockLine = this.boundryToDown - i;
+        const targetBlockLineNumberArray =
+          this.getBlockLineNumberArray(targetBlockLine);
+
+        result.push(targetBlockLineNumberArray);
+      }
+      return result;
+    }
   }
 }

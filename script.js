@@ -2,18 +2,16 @@
 
 import {
   GAME_MAP_HEIGHT,
-  MAX_HEIGHT_OF_GAME_MAP,
-  CENTER_POSITION_NUMBER,
+  GAME_MAP_WIDTH,
   DEFAULT_SCORE,
   SCORE_PER_ONE_LINE_BLOCK,
-  NEXT_BLOCK_CENTER_POSITION_NUMBER,
   TOTAL_NUMBER_OF_NEXTITEM_GRIDITEM,
 } from "./config.js";
 import GlobalData from "./GlobalData.js";
 import BlockMakeData from "./BlockMakeData.js";
 import BlockMoveData from "/BlockMoveData.js";
 import LastSavedBlockData from "./LastSavedBlockData.js";
-import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
+// import EnrichedBlockLineData from "./EnrichedBlockLineData.js";
 import BlockLineData from "./BlockLineData.js";
 import BlockLineDataForRemove from "./BlockLineDataForRemove.js";
 import BlockNumberArray from "./BlockNumberArray.js";
@@ -74,11 +72,11 @@ function resetNextItemMap() {
 }
 
 function resetScore() {
-  scoreBox.textContent = `점수: 0`;
+  scoreBox.textContent = `점수: ${DEFAULT_SCORE}`;
 }
 
 function makeGameMap() {
-  for (let i = 0; i < GAME_MAP_HEIGHT * 10; i++) {
+  for (let i = 0; i < GAME_MAP_HEIGHT * GAME_MAP_WIDTH; i++) {
     const gridItem = makeGridItem(i);
     playingBox.append(gridItem);
   }
@@ -486,36 +484,31 @@ function removeBlockLine(numberArray) {
 
 function moveAllBlockLineToBottom(globalData, data) {
   const inGameData = new BlockLineData(globalData, data);
-  moveRemainBlockDown(globalData, inGameData);
+  moveAllTargetBlockLineToDown(globalData, inGameData);
 }
 
-function moveRemainBlockDown(globalData, inGameData) {
-  const enrichedData = new EnrichedBlockLineData(inGameData);
-  // new BlockLineData에 data를 다 정리해두고 쓰면 안되나? Enrich를 만들어야하나?
-  moveTargetBlockLineToDown(globalData, enrichedData);
-}
+function moveAllTargetBlockLineToDown(globalData, inGameData) {
+  if (inGameData?.targetBlockLineNumberArray?.length) {
+    for (let i = 0; i < inGameData.numberOfBlockLine; i++) {
+      selectMoveTargetBlock(globalData, inGameData, i);
+      settingForMoveBlock(globalData, inGameData, i);
 
-function moveTargetBlockLineToDown(globalData, enrichedData) {
-  if (enrichedData?.targetBlockLineNumberArray?.length) {
-    for (let i = 0; i < enrichedData.numberOfBlockLine; i++) {
-      selectMoveTargetBlock(globalData, enrichedData, i);
-      settingForMoveBlock(globalData, enrichedData, i);
-
-      for (let j = 0; j < enrichedData.removedBlockLine.length; j++) {
+      for (let j = 0; j < inGameData.removedBlockLine.length; j++) {
         moveBlock(globalData);
       }
     }
   }
 }
 
-function selectMoveTargetBlock(globalData, enrichedData, i) {
-  globalData.currentBlockArray = enrichedData.targetBlockLineNumberArray[i];
+function selectMoveTargetBlock(globalData, inGameData, i) {
+  globalData.currentBlockArray = inGameData.targetBlockLineNumberArray[i];
 }
 
-function settingForMoveBlock(globalData, enrichedData, i) {
+function settingForMoveBlock(globalData, inGameData, i) {
   globalData.currentBlockType = "blockLine";
-  globalData.blockColorArray = enrichedData.getBlockLineColors(
-    enrichedData.targetBlockLineNumberArray[i]
+
+  globalData.blockColorArray = inGameData.getBlockLineColors(
+    inGameData.targetBlockLineNumberArray[i]
   );
   globalData.currentKeyPress = "ArrowDown";
 }
